@@ -43,12 +43,10 @@ export function FrontmatterForm({ frontmatter, onChange, errors = [] }: Frontmat
   };
 
   return (
-    <div className="bg-white border-b p-4">
-      <h2 className="text-lg font-semibold mb-4">Post Metadata</h2>
-      
+    <div className="bg-gray-800 p-4">
       {errors.length > 0 && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
-          <ul className="text-sm text-red-700 list-disc list-inside">
+        <div className="mb-4 p-3 bg-red-900/30 border border-red-800 rounded">
+          <ul className="text-sm text-red-400 list-disc list-inside">
             {errors.map((error, i) => (
               <li key={i}>{error}</li>
             ))}
@@ -56,105 +54,109 @@ export function FrontmatterForm({ frontmatter, onChange, errors = [] }: Frontmat
         </div>
       )}
 
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="title">
-            Title <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="title"
-            type="text"
-            value={frontmatter.title}
-            onChange={(e) => handleChange('title', e.target.value)}
-            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Post title"
-          />
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium mb-1 text-gray-400" htmlFor="title">
+              Title <span className="text-red-400">*</span>
+            </label>
+            <input
+              id="title"
+              type="text"
+              value={frontmatter.title}
+              onChange={(e) => handleChange('title', e.target.value)}
+              className="w-full px-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Post title"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1 text-gray-400" htmlFor="date">
+              Date <span className="text-red-400">*</span>
+            </label>
+            <input
+              id="date"
+              type="date"
+              value={frontmatter.date}
+              onChange={(e) => handleChange('date', e.target.value)}
+              className="w-full px-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="date">
-            Date <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="date"
-            type="date"
-            value={frontmatter.date}
-            onChange={(e) => handleChange('date', e.target.value)}
-            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="description">
-            Description <span className="text-red-500">*</span>
+          <label className="block text-xs font-medium mb-1 text-gray-400" htmlFor="description">
+            Description <span className="text-red-400">*</span>
           </label>
           <textarea
             id="description"
             value={frontmatter.description}
             onChange={(e) => handleChange('description', e.target.value)}
-            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3}
-            placeholder="Brief description for SEO and post listings"
+            className="w-full px-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            rows={2}
+            placeholder="Brief description"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="author">
-            Author <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="author"
-            type="text"
-            value={frontmatter.author}
-            onChange={(e) => handleChange('author', e.target.value)}
-            className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Author name"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="tags">
-            Tags
-          </label>
-          <div className="flex gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium mb-1 text-gray-400" htmlFor="author">
+              Author <span className="text-red-400">*</span>
+            </label>
             <input
-              id="tags"
+              id="author"
               type="text"
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyDown={handleTagKeyDown}
-              className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Add a tag"
+              value={frontmatter.author}
+              onChange={(e) => handleChange('author', e.target.value)}
+              className="w-full px-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Author name"
             />
-            <button
-              type="button"
-              onClick={handleAddTag}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Add
-            </button>
           </div>
-          
-          {frontmatter.tags && frontmatter.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {frontmatter.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="hover:text-blue-900"
-                  >
-                    <X size={14} />
-                  </button>
-                </span>
-              ))}
+
+          <div>
+            <label className="block text-xs font-medium mb-1 text-gray-400" htmlFor="tags">
+              Tags
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="tags"
+                type="text"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                className="flex-1 px-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Add tag"
+              />
+              <button
+                type="button"
+                onClick={handleAddTag}
+                className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+              >
+                Add
+              </button>
             </div>
-          )}
+          </div>
         </div>
+        
+        {frontmatter.tags && frontmatter.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {frontmatter.tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-900/40 text-blue-300 rounded text-xs"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveTag(tag)}
+                  className="hover:text-blue-200"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

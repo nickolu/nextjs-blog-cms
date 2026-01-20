@@ -2,14 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* TipTap Editor Styles */
+/* TipTap Editor Styles - Dark Theme */
 .ProseMirror {
-  @apply min-h-[400px] p-4 focus:outline-none;
+  @apply min-h-[400px] p-6 focus:outline-none text-gray-200 leading-relaxed;
+  font-size: 16px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .ProseMirror p {
   @apply mb-4;
   min-height: 1.5em;
+  line-height: 1.75;
 }
 
 .ProseMirror p:last-child {
@@ -17,20 +21,20 @@
 }
 
 .ProseMirror h1 {
-  @apply text-3xl font-bold mb-4 mt-6;
+  @apply text-3xl font-bold mb-4 mt-8 text-gray-100;
 }
 
 .ProseMirror h2 {
-  @apply text-2xl font-bold mb-3 mt-5;
+  @apply text-2xl font-bold mb-3 mt-6 text-gray-100;
 }
 
 .ProseMirror h3 {
-  @apply text-xl font-bold mb-2 mt-4;
+  @apply text-xl font-bold mb-2 mt-5 text-gray-100;
 }
 
 .ProseMirror ul,
 .ProseMirror ol {
-  @apply pl-6 mb-3;
+  @apply pl-6 mb-4;
 }
 
 .ProseMirror ul {
@@ -41,24 +45,28 @@
   @apply list-decimal;
 }
 
+.ProseMirror li {
+  @apply mb-1;
+}
+
 .ProseMirror code {
-  @apply bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono;
+  @apply bg-gray-800 text-blue-300 px-2 py-0.5 rounded text-sm font-mono;
 }
 
 .ProseMirror pre {
-  @apply bg-gray-900 text-gray-100 p-4 rounded-lg mb-3 overflow-x-auto;
+  @apply bg-gray-950 text-gray-100 p-4 rounded-lg mb-4 overflow-x-auto border border-gray-800;
 }
 
 .ProseMirror pre code {
-  @apply bg-transparent p-0;
+  @apply bg-transparent p-0 text-gray-100;
 }
 
 .ProseMirror blockquote {
-  @apply border-l-4 border-gray-300 pl-4 italic my-3;
+  @apply border-l-4 border-gray-600 pl-4 italic my-4 text-gray-400;
 }
 
 .ProseMirror a {
-  @apply text-blue-600 hover:text-blue-800 underline;
+  @apply text-blue-400 hover:text-blue-300 underline;
 }
 
 .ProseMirror img {
@@ -67,5 +75,32 @@
 
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
-  @apply text-gray-400 float-left h-0 pointer-events-none;
+  @apply text-gray-600 float-left h-0 pointer-events-none;
+}
+
+/* AI Autocomplete Suggestion Styles */
+.suggestion-text {
+  @apply text-gray-600 italic;
+  opacity: 0.7;
+  pointer-events: none;
+  user-select: none;
+}
+
+.suggestion-text::before {
+  content: attr(data-suggestion-prefix);
+}
+
+/* Custom Tailwind colors for dark theme */
+@layer utilities {
+  .bg-gray-850 {
+    background-color: #1a1d23;
+  }
+  
+  .bg-gray-750 {
+    background-color: #2d3139;
+  }
+  
+  .bg-gray-950 {
+    background-color: #0d0f12;
+  }
 }

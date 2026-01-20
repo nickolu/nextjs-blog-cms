@@ -1,5 +1,5 @@
 import React from 'react';
-import { FolderOpen, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { FolderOpen, Save, AlertCircle, CheckCircle, PanelLeftClose, PanelLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import { FileManager } from './components/FileManager';
 import { FrontmatterForm } from './components/FrontmatterForm';
 import { Editor } from './components/Editor';
@@ -38,6 +38,8 @@ function App() {
   const [isNewPost, setIsNewPost] = React.useState(false);
   const [lastSaveTime, setLastSaveTime] = React.useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
+  const [sidebarOpen, setSidebarOpen] = React.useState(true);
+  const [metadataOpen, setMetadataOpen] = React.useState(true);
 
   // Check for saved directory handle on mount
   React.useEffect(() => {
@@ -243,50 +245,57 @@ function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col bg-gray-900">
       {/* Header */}
-      <header className="bg-white border-b p-4 flex items-center justify-between">
+      <header className="bg-gray-800 border-b border-gray-700 p-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold">Blog CMS</h1>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded"
+            title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+          >
+            {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
+          </button>
+          <h1 className="text-lg font-semibold text-gray-100">Blog CMS</h1>
           <button
             onClick={handleOpenDirectory}
-            className="text-sm text-gray-600 hover:text-gray-900"
+            className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded"
             title="Change directory"
           >
-            <FolderOpen size={18} />
+            <FolderOpen size={16} />
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {saveStatus === 'saved' && (
-            <span className="text-sm text-green-600 flex items-center gap-1">
-              <CheckCircle size={16} />
-              Saved!
+            <span className="text-sm text-green-400 flex items-center gap-1">
+              <CheckCircle size={14} />
+              Saved
             </span>
           )}
           {saveStatus === 'auto-saved' && lastSaveTime && (
-            <span className="text-sm text-gray-600 flex items-center gap-1">
-              <CheckCircle size={16} />
-              Auto-saved at {lastSaveTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              <CheckCircle size={14} />
+              {lastSaveTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
           {saveStatus === 'auto-saving' && (
-            <span className="text-sm text-gray-600 flex items-center gap-1">
-              Auto-saving...
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              Saving...
             </span>
           )}
           {saveStatus === 'error' && (
-            <span className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle size={16} />
+            <span className="text-sm text-red-400 flex items-center gap-1">
+              <AlertCircle size={14} />
               Error
             </span>
           )}
           <button
             onClick={() => handleSave(false)}
             disabled={saveStatus === 'saving' || saveStatus === 'auto-saving'}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
           >
-            <Save size={18} />
+            <Save size={14} />
             {saveStatus === 'saving' ? 'Saving...' : 'Save'}
           </button>
         </div>
@@ -295,28 +304,44 @@ function App() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* File Manager Sidebar */}
-        <div className="w-80">
-          <FileManager
-            posts={posts}
-            selectedPost={selectedPost}
-            onSelectPost={handleSelectPost}
-            onNewPost={handleNewPost}
-          />
-        </div>
+        {sidebarOpen && (
+          <div className="w-72 flex-shrink-0">
+            <FileManager
+              posts={posts}
+              selectedPost={selectedPost}
+              onSelectPost={handleSelectPost}
+              onNewPost={handleNewPost}
+            />
+          </div>
+        )}
 
         {/* Editor Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {selectedPost || isNewPost ? (
             <>
-              <FrontmatterForm
-                frontmatter={frontmatter}
-                onChange={setFrontmatter}
-                errors={errors}
-              />
+              {/* Collapsible Metadata */}
+              <div className="border-b border-gray-700">
+                <button
+                  onClick={() => setMetadataOpen(!metadataOpen)}
+                  className="w-full px-4 py-2 bg-gray-800 hover:bg-gray-750 flex items-center justify-between text-gray-300 text-sm"
+                >
+                  <span className="font-medium">Post Metadata</span>
+                  {metadataOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+                {metadataOpen && (
+                  <FrontmatterForm
+                    frontmatter={frontmatter}
+                    onChange={setFrontmatter}
+                    errors={errors}
+                  />
+                )}
+              </div>
               <div className="flex-1 overflow-hidden">
                 <Editor
                   content={body}
                   onChange={setBody}
+                  postTitle={frontmatter.title}
+                  postDescription={frontmatter.description}
                 />
               </div>
             </>
