@@ -94,13 +94,23 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
   React.useEffect(() => {
     if (!editor) return;
     
-    editor.extensionManager.extensions.forEach((extension) => {
-      if (extension.name === 'autocomplete') {
-        extension.options.enabled = autocompleteEnabled && aiAvailable;
-        extension.options.postTitle = postTitle;
-        extension.options.postDescription = postDescription;
-      }
-    });
+    // Update options using updateAttributes to trigger reactivity
+    const autocompleteExt = editor.extensionManager.extensions.find(
+      (ext) => ext.name === 'autocomplete'
+    );
+    
+    if (autocompleteExt) {
+      const newEnabled = autocompleteEnabled && aiAvailable;
+      console.log('[Editor useEffect] Setting enabled to:', newEnabled);
+      
+      // Update options for context (title/description)
+      (autocompleteExt.options as any).postTitle = postTitle;
+      (autocompleteExt.options as any).postDescription = postDescription;
+      
+      // Dispatch transaction to update plugin state
+      const tr = editor.state.tr.setMeta('setAutocompleteEnabled', newEnabled);
+      editor.view.dispatch(tr);
+    }
   }, [editor, autocompleteEnabled, aiAvailable, postTitle, postDescription]);
 
   // Convert markdown to HTML and set it in the editor only on initial load or external content changes

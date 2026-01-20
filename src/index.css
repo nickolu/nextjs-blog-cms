@@ -90,6 +90,44 @@
   content: attr(data-suggestion-prefix);
 }
 
+/* Autocomplete Loading Animation */
+.autocomplete-loading {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 0 4px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.autocomplete-loading .dot {
+  width: 4px;
+  height: 4px;
+  background-color: #4b5563;
+  border-radius: 50%;
+  display: inline-block;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.autocomplete-loading .dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.autocomplete-loading .dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* Custom Tailwind colors for dark theme */
 @layer utilities {
   .bg-gray-850 {

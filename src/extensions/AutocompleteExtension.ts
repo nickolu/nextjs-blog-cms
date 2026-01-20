@@ -14,6 +14,7 @@ interface AutocompleteState {
   suggestion: string | null;
   isLoading: boolean;
   decorations: DecorationSet;
+  enabled: boolean;
 }
 
 const autocompletePluginKey = new PluginKey<AutocompleteState>('autocomplete');
@@ -31,7 +32,7 @@ export const AutocompleteExtension = Extension.create<AutocompleteOptions>({
   },
 
   addProseMirrorPlugins() {
-    const options = this.options;
+    const extension = this;
 
     return [
       new Plugin<AutocompleteState>({
@@ -43,30 +44,46 @@ export const AutocompleteExtension = Extension.create<AutocompleteOptions>({
               suggestion: null,
               isLoading: false,
               decorations: DecorationSet.empty,
+              enabled: extension.options.enabled,
             };
           },
 
           apply(tr, value, _oldState, newState) {
-            // If autocomplete is disabled, return empty state
-            if (!options.enabled) {
-              return {
-                suggestion: null,
-                isLoading: false,
-                decorations: DecorationSet.empty,
-              };
-            }
-
-            // Check for meta commands
+            // Check for meta commands first
+            const setEnabled = tr.getMeta('setAutocompleteEnabled');
             const clearSuggestion = tr.getMeta('clearSuggestion');
             const acceptSuggestion = tr.getMeta('acceptSuggestion');
             const newSuggestion = tr.getMeta('setSuggestion');
             const setLoading = tr.getMeta('setLoading');
+
+            // Handle enabled state change
+            if (setEnabled !== undefined) {
+              const newEnabled = setEnabled as boolean;
+              console.log('[Plugin apply] Setting enabled to:', newEnabled);
+              return {
+                suggestion: null,
+                isLoading: false,
+                decorations: DecorationSet.empty,
+                enabled: newEnabled,
+              };
+            }
+
+            // If autocomplete is disabled, return empty state
+            if (!value.enabled) {
+              return {
+                suggestion: null,
+                isLoading: false,
+                decorations: DecorationSet.empty,
+                enabled: value.enabled,
+              };
+            }
 
             if (clearSuggestion) {
               return {
                 suggestion: null,
                 isLoading: false,
                 decorations: DecorationSet.empty,
+                enabled: value.enabled,
               };
             }
 
@@ -76,13 +93,26 @@ export const AutocompleteExtension = Extension.create<AutocompleteOptions>({
                 suggestion: null,
                 isLoading: false,
                 decorations: DecorationSet.empty,
+                enabled: value.enabled,
               };
             }
 
             if (setLoading !== undefined) {
               return {
                 ...value,
+                enabled: value.enabled,
                 isLoading: setLoading,
+                // Add loading decoration if loading
+                decorations: setLoading && !value.suggestion
+                  ? DecorationSet.create(newState.doc, [
+                      Decoration.widget(newState.selection.from, () => {
+                        const span = document.createElement('span');
+                        span.className = 'autocomplete-loading';
+                        span.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+                        return span;
+                      })
+                    ])
+                  : value.decorations,
               };
             }
 
@@ -94,6 +124,7 @@ export const AutocompleteExtension = Extension.create<AutocompleteOptions>({
                   suggestion: null,
                   isLoading: false,
                   decorations: DecorationSet.empty,
+                  enabled: value.enabled,
                 };
               }
 
@@ -112,6 +143,7 @@ export const AutocompleteExtension = Extension.create<AutocompleteOptions>({
                 suggestion,
                 isLoading: false,
                 decorations: decorationSet,
+                enabled: value.enabled,
               };
             }
 
@@ -122,12 +154,14 @@ export const AutocompleteExtension = Extension.create<AutocompleteOptions>({
                 suggestion: null,
                 isLoading: false,
                 decorations: DecorationSet.empty,
+                enabled: value.enabled,
               };
             }
 
             // Map decorations through changes
             return {
               ...value,
+              enabled: value.enabled,
               decorations: value.decorations.map(tr.mapping, tr.doc),
             };
           },
@@ -172,10 +206,17 @@ export const AutocompleteExtension = Extension.create<AutocompleteOptions>({
 
           // Handle text input to trigger completions
           handleTextInput(view) {
-            if (!options.enabled) return false;
+            const pluginState = autocompletePluginKey.getState(view.state);
+            console.log('[handleTextInput] enabled:', pluginState?.enabled);
+            if (!pluginState?.enabled) return false;
 
             // Wait for the next tick so the character is inserted into the document
             setTimeout(() => {
+              // Check again after setTimeout in case it was disabled during the delay
+              const currentPluginState = autocompletePluginKey.getState(view.state);
+              console.log('[setTimeout] enabled:', currentPluginState?.enabled);
+              if (!currentPluginState?.enabled) return;
+
               const state = view.state;
               const { selection } = state;
               const { from } = selection;
@@ -202,12 +243,20 @@ export const AutocompleteExtension = Extension.create<AutocompleteOptions>({
               const context: CompletionContext = {
                 textBeforeCursor,
                 currentParagraph,
-                postTitle: options.postTitle,
-                postDescription: options.postDescription,
+                postTitle: extension.options.postTitle,
+                postDescription: extension.options.postDescription,
               };
 
               // Request completion (debounced)
-              getAICompletionDebounced(context, options.delay).then((suggestion) => {
+              getAICompletionDebounced(context, extension.options.delay).then((suggestion) => {
+                // Check if still enabled before setting suggestion
+                const finalPluginState = autocompletePluginKey.getState(view.state);
+                console.log('[then callback] enabled:', finalPluginState?.enabled, 'suggestion:', suggestion?.substring(0, 20));
+                if (!finalPluginState?.enabled) {
+                  console.log('[then callback] BLOCKED - autocomplete disabled');
+                  return;
+                }
+
                 // Only set suggestion if cursor hasn't moved too far and we have a suggestion
                 const currentState = view.state;
                 const currentFrom = currentState.selection.from;
