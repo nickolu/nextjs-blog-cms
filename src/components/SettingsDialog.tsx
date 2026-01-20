@@ -9,10 +9,7 @@ interface SettingsDialogProps {
 }
 
 const AVAILABLE_MODELS = [
-  { value: 'gpt-5.2', label: 'GPT-5.2 - Best for coding and agentic tasks' },
-  { value: 'gpt-5-mini', label: 'GPT-5 Mini - Faster & cost-efficient' },
-  { value: 'gpt-5-nano', label: 'GPT-5 Nano - Fastest & most cost-efficient' },
-  { value: 'gpt-5', label: 'GPT-5 - Intelligent reasoning model' },
+  { value: 'gpt-5-mini', label: 'GPT-5 Mini - Fast & cost-efficient (Recommended)' },
   { value: 'gpt-4.1', label: 'GPT-4.1 - Smartest non-reasoning model' },
   { value: 'gpt-4o', label: 'GPT-4o - Balanced (Legacy)' },
   { value: 'gpt-4o-mini', label: 'GPT-4o Mini - Fast & Cheap (Legacy)' },

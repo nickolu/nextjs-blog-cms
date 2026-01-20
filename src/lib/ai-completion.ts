@@ -26,8 +26,18 @@ function usesMaxCompletionTokens(model: string): boolean {
 
 // Helper to check if model supports custom temperature
 function supportsCustomTemperature(model: string): boolean {
-  // gpt-5-nano only supports temperature=1 (default)
-  return model !== 'gpt-5-nano';
+  // gpt-5-nano and gpt-5-mini only support temperature=1 (default)
+  return model !== 'gpt-5-nano' && model !== 'gpt-5-mini';
+}
+
+// Helper to get appropriate token limit for model
+function getCompletionTokenLimit(model: string): number {
+  // Reasoning models need much more tokens for internal reasoning
+  // gpt-5-nano uses reasoning tokens, so we need to allocate extra
+  if (model === 'gpt-5-nano' || model === 'gpt-5' || model === 'gpt-5.2') {
+    return 1500; // Significantly more tokens for reasoning + output
+  }
+  return 100; // Standard models
 }
 
 export interface CompletionContext {
@@ -126,10 +136,11 @@ Only provide the continuation text, without repeating what was already written.`
     };
 
     // Use correct token limit parameter based on model
+    const tokenLimit = getCompletionTokenLimit(settings.aiAutocomplete.model);
     if (usesMaxCompletionTokens(settings.aiAutocomplete.model)) {
-      requestParams.max_completion_tokens = 100;
+      requestParams.max_completion_tokens = tokenLimit;
     } else {
-      requestParams.max_tokens = 100;
+      requestParams.max_tokens = tokenLimit;
     }
 
     // Only set temperature if model supports it
