@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { getSettings } from './settings';
 
 // Initialize OpenAI client
 let openai: OpenAI | null = null;
@@ -16,6 +17,17 @@ function getOpenAIClient(): OpenAI | null {
     });
   }
   return openai;
+}
+
+// Helper to check if model uses max_completion_tokens instead of max_tokens
+function usesMaxCompletionTokens(model: string): boolean {
+  return model.startsWith('gpt-5');
+}
+
+// Helper to check if model supports custom temperature
+function supportsCustomTemperature(model: string): boolean {
+  // gpt-5-nano only supports temperature=1 (default)
+  return model !== 'gpt-5-nano';
 }
 
 export interface CompletionContext {
@@ -79,10 +91,18 @@ export async function getAICompletion(context: CompletionContext): Promise<strin
   }
 
   try {
+    // Get settings for model and custom system prompt
+    const settings = getSettings();
+
     // Build prompt with context
-    const systemPrompt = `You are a helpful writing assistant. Continue the text naturally based on the context. 
+    const defaultSystemPrompt = `You are a helpful writing assistant. Continue the text naturally based on the context.
 Keep completions concise (1-2 sentences max). Match the writing style and tone.
 Only provide the continuation text, without repeating what was already written.`;
+
+    // Use custom system prompt if provided, otherwise use default
+    const systemPrompt = settings.aiAutocomplete.systemPrompt
+      ? `${defaultSystemPrompt}\n\nAdditional instructions: ${settings.aiAutocomplete.systemPrompt}`
+      : defaultSystemPrompt;
 
     let userPrompt = '';
     if (context.postTitle || context.postDescription) {
@@ -91,20 +111,33 @@ Only provide the continuation text, without repeating what was already written.`
       if (context.postDescription) userPrompt += `Description: ${context.postDescription}\n`;
       userPrompt += '\n';
     }
-    
+
     userPrompt += 'Text to continue:\n';
     userPrompt += context.textBeforeCursor.slice(-1000); // Last 1000 chars
 
-    const response = await client.chat.completions.create({
-      model: import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini',
+    // Build request params based on model
+    const requestParams: any = {
+      model: settings.aiAutocomplete.model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      max_tokens: 100,
-      temperature: 0.7,
       stream: false,
-    });
+    };
+
+    // Use correct token limit parameter based on model
+    if (usesMaxCompletionTokens(settings.aiAutocomplete.model)) {
+      requestParams.max_completion_tokens = 100;
+    } else {
+      requestParams.max_tokens = 100;
+    }
+
+    // Only set temperature if model supports it
+    if (supportsCustomTemperature(settings.aiAutocomplete.model)) {
+      requestParams.temperature = 0.7;
+    }
+
+    const response = await client.chat.completions.create(requestParams);
 
     const completion = response.choices[0]?.message?.content?.trim() || null;
     
@@ -155,6 +188,9 @@ export async function getWritingReview(context: ReviewContext): Promise<string |
   }
 
   try {
+    // Get settings for model
+    const settings = getSettings();
+
     const systemPrompt = `You are an expert writing coach. Provide constructive feedback on writing quality, focusing on:
 - Tone and voice
 - Grammar and punctuation
@@ -171,18 +207,24 @@ Provide specific, actionable feedback. Do NOT rewrite the text - only give feedb
       if (context.postDescription) userPrompt += `Post Description: ${context.postDescription}\n`;
       userPrompt += '\n';
     }
-    
+
     userPrompt += 'Please review this writing:\n\n';
     userPrompt += context.text;
 
-    const response = await client.chat.completions.create({
-      model: import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini',
+    const requestParams: any = {
+      model: settings.aiAutocomplete.model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      temperature: 0.7,
-    });
+    };
+
+    // Only set temperature if model supports it
+    if (supportsCustomTemperature(settings.aiAutocomplete.model)) {
+      requestParams.temperature = 0.7;
+    }
+
+    const response = await client.chat.completions.create(requestParams);
 
     return response.choices[0]?.message?.content?.trim() || null;
   } catch (error) {
@@ -206,6 +248,9 @@ export async function rewriteWithFeedback(context: RewriteContext): Promise<stri
   }
 
   try {
+    // Get settings for model
+    const settings = getSettings();
+
     const systemPrompt = `You are an expert writing assistant. Rewrite the provided text based on the feedback given. Maintain the original meaning and key points while improving the writing quality.`;
 
     let userPrompt = '';
@@ -215,27 +260,33 @@ export async function rewriteWithFeedback(context: RewriteContext): Promise<stri
       if (context.postDescription) userPrompt += `Post Description: ${context.postDescription}\n`;
       userPrompt += '\n';
     }
-    
+
     userPrompt += 'Original text:\n';
     userPrompt += context.originalText;
     userPrompt += '\n\nFeedback to address:\n';
     userPrompt += context.feedback;
-    
+
     if (context.additionalInput) {
       userPrompt += '\n\nAdditional instructions:\n';
       userPrompt += context.additionalInput;
     }
-    
+
     userPrompt += '\n\nPlease rewrite the text addressing the feedback. Return only the rewritten text, no explanations.';
 
-    const response = await client.chat.completions.create({
-      model: import.meta.env.VITE_OPENAI_MODEL || 'gpt-4o-mini',
+    const requestParams: any = {
+      model: settings.aiAutocomplete.model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      temperature: 0.7,
-    });
+    };
+
+    // Only set temperature if model supports it
+    if (supportsCustomTemperature(settings.aiAutocomplete.model)) {
+      requestParams.temperature = 0.7;
+    }
+
+    const response = await client.chat.completions.create(requestParams);
 
     return response.choices[0]?.message?.content?.trim() || null;
   } catch (error) {

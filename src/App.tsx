@@ -1,8 +1,9 @@
 import React from 'react';
-import { FolderOpen, Save, AlertCircle, CheckCircle, PanelLeftClose, PanelLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { FolderOpen, Save, AlertCircle, CheckCircle, PanelLeftClose, PanelLeft, ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import { FileManager } from './components/FileManager';
 import { FrontmatterForm } from './components/FrontmatterForm';
 import { Editor } from './components/Editor';
+import { SettingsDialog } from './components/SettingsDialog';
 import {
   openDirectory,
   listMDXFiles,
@@ -40,6 +41,8 @@ function App() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const [metadataOpen, setMetadataOpen] = React.useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+  const [settingsVersion, setSettingsVersion] = React.useState(0);
 
   // Check for saved directory handle on mount
   React.useEffect(() => {
@@ -207,6 +210,12 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [frontmatter, body, directoryHandle, selectedPost, isNewPost]);
 
+  // Handle settings change
+  const handleSettingsChange = () => {
+    // Increment version to trigger re-render in child components
+    setSettingsVersion((v) => v + 1);
+  };
+
   // Check if File System Access API is supported
   if (!isFileSystemAccessSupported()) {
     return (
@@ -263,6 +272,13 @@ function App() {
             title="Change directory"
           >
             <FolderOpen size={16} />
+          </button>
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded"
+            title="Settings"
+          >
+            <Settings size={16} />
           </button>
         </div>
 
@@ -338,6 +354,7 @@ function App() {
               </div>
               <div className="flex-1 overflow-hidden">
                 <Editor
+                  key={settingsVersion}
                   content={body}
                   onChange={setBody}
                   postTitle={frontmatter.title}
@@ -355,6 +372,13 @@ function App() {
           )}
         </div>
       </div>
+
+      {/* Settings Dialog */}
+      <SettingsDialog
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        onSettingsChange={handleSettingsChange}
+      />
     </div>
   );
 }

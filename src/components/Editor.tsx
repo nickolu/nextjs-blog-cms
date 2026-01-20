@@ -27,6 +27,7 @@ import {
 import { AutocompleteExtension } from '../extensions/AutocompleteExtension';
 import { isAICompletionAvailable } from '../lib/ai-completion';
 import { ReviewDialog } from './ReviewDialog';
+import { getSettings, updateSettings } from '../lib/settings';
 
 interface EditorProps {
   content: string;
@@ -45,7 +46,7 @@ const turndownService = new TurndownService({
 export function Editor({ content, onChange, postTitle, postDescription }: EditorProps) {
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
   const isUpdatingRef = React.useRef(false);
-  const [autocompleteEnabled, setAutocompleteEnabled] = React.useState(true);
+  const [autocompleteEnabled, setAutocompleteEnabled] = React.useState(() => getSettings().aiAutocomplete.enabled);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = React.useState(false);
   const [selectedTextForReview, setSelectedTextForReview] = React.useState('');
   const aiAvailable = isAICompletionAvailable();
@@ -161,6 +162,17 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
     }
+  };
+
+  const handleAutocompleteToggle = () => {
+    const newEnabled = !autocompleteEnabled;
+    setAutocompleteEnabled(newEnabled);
+    updateSettings({
+      aiAutocomplete: {
+        ...getSettings().aiAutocomplete,
+        enabled: newEnabled,
+      },
+    });
   };
 
   const handleAIReview = () => {
@@ -314,7 +326,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
             <div className="w-px bg-gray-600 mx-1" />
             
             <button
-              onClick={() => setAutocompleteEnabled(!autocompleteEnabled)}
+              onClick={handleAutocompleteToggle}
               className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${
                 autocompleteEnabled ? 'bg-gray-700 text-yellow-400' : ''
               }`}
