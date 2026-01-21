@@ -116,11 +116,13 @@ async function saveDirectoryHandle(handle: FileSystemDirectoryHandle): Promise<v
   const db = await openDB();
   const transaction = db.transaction(STORE_NAME, 'readwrite');
   const store = transaction.objectStore(STORE_NAME);
-  
+
   return new Promise((resolve, reject) => {
     const request = store.put(handle, HANDLE_KEY);
     request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve();
+
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
   });
 }
 
@@ -129,25 +131,55 @@ export async function getSavedDirectoryHandle(): Promise<FileSystemDirectoryHand
     const db = await openDB();
     const transaction = db.transaction(STORE_NAME, 'readonly');
     const store = transaction.objectStore(STORE_NAME);
-    
+
+    const handle = await new Promise<FileSystemDirectoryHandle | undefined>((resolve, reject) => {
+      const request = store.get(HANDLE_KEY);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result as FileSystemDirectoryHandle | undefined);
+    });
+
+    if (!handle) {
+      return null;
+    }
+
+    // Only check permission, don't request it (that requires user interaction)
+    const permission = await handle.queryPermission({ mode: 'readwrite' });
+    if (permission === 'granted') {
+      return handle;
+    }
+
+    // Return null if permission not granted - UI will handle requesting it
+    return null;
+  } catch (err) {
+    console.error('Error in getSavedDirectoryHandle:', err);
+    return null;
+  }
+}
+
+// Request permission for a saved handle (must be called from user interaction)
+export async function requestDirectoryPermission(
+  handle: FileSystemDirectoryHandle
+): Promise<boolean> {
+  try {
+    const permission = await handle.requestPermission({ mode: 'readwrite' });
+    return permission === 'granted';
+  } catch (err) {
+    console.error('Error requesting permission:', err);
+    return false;
+  }
+}
+
+// Get saved handle without checking permission (for UI display)
+export async function getSavedDirectoryHandleWithoutPermission(): Promise<FileSystemDirectoryHandle | null> {
+  try {
+    const db = await openDB();
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+
     return new Promise((resolve, reject) => {
       const request = store.get(HANDLE_KEY);
       request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const handle = request.result as FileSystemDirectoryHandle | undefined;
-        if (handle) {
-          // Verify we still have permission
-          handle.queryPermission({ mode: 'readwrite' }).then(permission => {
-            if (permission === 'granted') {
-              resolve(handle);
-            } else {
-              resolve(null);
-            }
-          });
-        } else {
-          resolve(null);
-        }
-      };
+      request.onsuccess = () => resolve(request.result as FileSystemDirectoryHandle | undefined || null);
     });
   } catch {
     return null;

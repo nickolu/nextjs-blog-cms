@@ -10,6 +10,8 @@ import {
   writeFile,
   createFile,
   getSavedDirectoryHandle,
+  getSavedDirectoryHandleWithoutPermission,
+  requestDirectoryPermission,
   isFileSystemAccessSupported,
   BlogPost,
 } from './lib/file-system';
@@ -24,6 +26,7 @@ import {
 
 function App() {
   const [directoryHandle, setDirectoryHandle] = React.useState<FileSystemDirectoryHandle | null>(null);
+  const [savedHandleNeedsPermission, setSavedHandleNeedsPermission] = React.useState<FileSystemDirectoryHandle | null>(null);
   const [posts, setPosts] = React.useState<BlogPost[]>([]);
   const [selectedPost, setSelectedPost] = React.useState<BlogPost | null>(null);
   const [frontmatter, setFrontmatter] = React.useState<Frontmatter>({
@@ -51,6 +54,12 @@ function App() {
       if (handle) {
         setDirectoryHandle(handle);
         await loadPosts(handle);
+      } else {
+        // Check if we have a saved handle that needs permission
+        const savedHandle = await getSavedDirectoryHandleWithoutPermission();
+        if (savedHandle) {
+          setSavedHandleNeedsPermission(savedHandle);
+        }
       }
     };
     loadSavedDirectory();
@@ -71,9 +80,26 @@ function App() {
     try {
       const handle = await openDirectory();
       setDirectoryHandle(handle);
+      setSavedHandleNeedsPermission(null);
       await loadPosts(handle);
     } catch (err) {
       console.error('Failed to open directory:', err);
+    }
+  };
+
+  // Handle restoring access to saved directory
+  const handleRestoreAccess = async () => {
+    if (!savedHandleNeedsPermission) return;
+
+    try {
+      const granted = await requestDirectoryPermission(savedHandleNeedsPermission);
+      if (granted) {
+        setDirectoryHandle(savedHandleNeedsPermission);
+        setSavedHandleNeedsPermission(null);
+        await loadPosts(savedHandleNeedsPermission);
+      }
+    } catch (err) {
+      console.error('Failed to restore access:', err);
     }
   };
 
@@ -239,15 +265,41 @@ function App() {
         <div className="max-w-md p-6 bg-white rounded-lg shadow-lg">
           <FolderOpen className="mx-auto mb-4 text-blue-600" size={48} />
           <h1 className="text-2xl font-bold text-center mb-2">Blog CMS</h1>
-          <p className="text-gray-600 text-center mb-6">
-            Select your blog content directory to get started
-          </p>
-          <button
-            onClick={handleOpenDirectory}
-            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
-          >
-            Open Directory
-          </button>
+
+          {savedHandleNeedsPermission ? (
+            <>
+              <p className="text-gray-600 text-center mb-4">
+                Restore access to your blog directory:
+              </p>
+              <p className="text-sm text-gray-500 text-center mb-6 font-mono bg-gray-50 px-3 py-2 rounded">
+                {savedHandleNeedsPermission.name}
+              </p>
+              <button
+                onClick={handleRestoreAccess}
+                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium mb-3"
+              >
+                Restore Access
+              </button>
+              <button
+                onClick={handleOpenDirectory}
+                className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
+              >
+                Choose Different Directory
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-gray-600 text-center mb-6">
+                Select your blog content directory to get started
+              </p>
+              <button
+                onClick={handleOpenDirectory}
+                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                Open Directory
+              </button>
+            </>
+          )}
         </div>
       </div>
     );
