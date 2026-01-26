@@ -105,6 +105,7 @@ export function createBlankPost(): string {
     description: 'A brief description of your post',
     author: 'Nickolus Cunningham',
     tags: [],
+    draft: true,
   };
   
   const body = '# New Blog Post\n\nStart writing your content here...';
