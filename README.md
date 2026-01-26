@@ -68,8 +68,8 @@ The CMS supports the following frontmatter fields:
 ## File Structure
 
 ```
-~/git/personal/
-├── blog-cms/                    # CMS application (sibling to main site)
+your-project/
+├── blog-cms/                    # CMS application
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── Editor.tsx          # TipTap WYSIWYG editor
@@ -83,7 +83,7 @@ The CMS supports the following frontmatter fields:
 │   ├── index.html
 │   ├── package.json
 │   └── README.md
-└── cunningjams.com/             # Main website
+└── my-nextjs-blog/              # Your Next.js blog (or any static site)
     └── content/
         └── blog/                # Blog posts directory
 ```
@@ -199,10 +199,91 @@ pnpm build
 pnpm preview
 ```
 
+## Deployment
+
+The CMS can be deployed to any static hosting service. Since it runs entirely in the browser and requires the File System Access API, users will need to grant permission to their local blog directory.
+
+### Vercel
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+```
+
+Or connect your GitHub repository in the Vercel dashboard for automatic deployments.
+
+### Netlify
+
+```bash
+# Install Netlify CLI
+npm i -g netlify-cli
+
+# Build and deploy
+pnpm build
+netlify deploy --prod --dir=dist
+```
+
+Or connect your GitHub repository in the Netlify dashboard.
+
+### GitHub Pages
+
+1. Build the project:
+   ```bash
+   pnpm build
+   ```
+
+2. Deploy the `dist` folder to GitHub Pages using GitHub Actions or manually.
+
+3. Example GitHub Actions workflow (`.github/workflows/deploy.yml`):
+   ```yaml
+   name: Deploy to GitHub Pages
+   
+   on:
+     push:
+       branches: [ main ]
+   
+   jobs:
+     deploy:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v4
+         - uses: pnpm/action-setup@v2
+           with:
+             version: 10.10.0
+         - uses: actions/setup-node@v4
+           with:
+             node-version: '20'
+             cache: 'pnpm'
+         - run: pnpm install
+         - run: pnpm build
+         - uses: peaceiris/actions-gh-pages@v3
+           with:
+             github_token: ${{ secrets.GITHUB_TOKEN }}
+             publish_dir: ./dist
+   ```
+
+### Other Static Hosts
+
+The CMS works with any static hosting provider. Just build and deploy the `dist` folder:
+- Cloudflare Pages
+- Firebase Hosting
+- AWS S3 + CloudFront
+- Render
+- Railway
+
+### Environment Variables
+
+If you're using AI autocomplete features, make sure to set your environment variables in your hosting provider's dashboard:
+- `VITE_OPENAI_API_KEY` - Your OpenAI API key
+- `VITE_OPENAI_MODEL` - (Optional) Model selection
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
 ## License
 
-MIT
-
-## Author
-
-Built for cunningjams.com
+MIT - see [LICENSE](LICENSE) for details.

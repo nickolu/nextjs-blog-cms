@@ -22,7 +22,7 @@ pnpm preview
 
 1. **Open the CMS** in your browser
 2. **Click "Open Directory"**
-3. **Navigate to and select** `~/git/personal/cunningjams.com/content/blog`
+3. **Navigate to and select** your blog's content directory (e.g., `~/my-blog/content/blog`)
 4. **Grant permissions** when prompted (select "View files" and "Save changes")
 5. You'll see all your existing blog posts in the sidebar!
 
@@ -74,8 +74,8 @@ The toolbar provides:
 After saving in the CMS:
 
 1. Go back to your main blog directory
-2. Run `pnpm dev` (if not already running)
-3. Visit http://localhost:3000/blog
+2. Run your blog's dev server (e.g., `npm run dev` or `pnpm dev`)
+3. Visit your blog in the browser
 4. Your changes will be live immediately!
 
 ## Browser Requirements
@@ -91,7 +91,7 @@ After saving in the CMS:
 
 ### Can't see any posts
 
-- Make sure you selected the correct directory (`content/blog`)
+- Make sure you selected the correct directory containing your MDX/MD files
 - Check that you granted "readwrite" permissions
 
 ### Changes not saving
@@ -110,6 +110,6 @@ After saving in the CMS:
 - Try creating a new blog post!
 - Edit one of your existing posts
 - Experiment with the WYSIWYG editor features
-- Check your changes in the main blog at http://localhost:3000/blog
+- Check your changes in your blog's dev server
 
 Enjoy your new CMS! 🎉

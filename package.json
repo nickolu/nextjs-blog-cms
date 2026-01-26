@@ -8,9 +8,30 @@
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "cms",
+    "blog",
+    "mdx",
+    "markdown",
+    "nextjs",
+    "editor",
+    "wysiwyg",
+    "tiptap",
+    "file-system-access-api",
+    "browser-based",
+    "static-site",
+    "content-management"
+  ],
+  "author": "Blog CMS Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/blog-cms.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/blog-cms/issues"
+  },
+  "homepage": "https://github.com/yourusername/blog-cms#readme",
   "packageManager": "pnpm@10.10.0",
   "devDependencies": {
     "@types/marked": "^6.0.0",
