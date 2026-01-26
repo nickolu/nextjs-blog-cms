@@ -55,6 +55,23 @@ export function FrontmatterForm({ frontmatter, onChange, errors = [] }: Frontmat
       )}
 
       <div className="space-y-3">
+        <div className="flex items-center gap-3 mb-3">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={frontmatter.draft === true}
+              onChange={(e) => onChange({ ...frontmatter, draft: e.target.checked })}
+              className="w-4 h-4 bg-gray-900 border-gray-700 rounded focus:ring-2 focus:ring-blue-500 text-blue-600"
+            />
+            <span className="text-sm text-gray-300">Draft</span>
+          </label>
+          {frontmatter.draft && (
+            <span className="text-xs px-2 py-0.5 bg-yellow-900/40 text-yellow-300 rounded">
+              This post will not be published
+            </span>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium mb-1 text-gray-400" htmlFor="title">

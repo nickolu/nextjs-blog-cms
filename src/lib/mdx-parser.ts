@@ -6,6 +6,7 @@ export interface Frontmatter {
   description: string;
   author: string;
   tags?: string[];
+  draft?: boolean;
 }
 
 export interface ParsedMDX {
@@ -25,6 +26,7 @@ export function parseMDX(content: string): ParsedMDX {
       description: data.description || '',
       author: data.author || 'Nickolus Cunningham',
       tags: Array.isArray(data.tags) ? data.tags : [],
+      draft: data.draft === true,
     };
     
     return {
@@ -40,10 +42,13 @@ export function parseMDX(content: string): ParsedMDX {
 // Serialize frontmatter and body back into MDX format
 export function serializeMDX(frontmatter: Frontmatter, body: string): string {
   try {
-    // Clean up frontmatter - remove empty tags array
+    // Clean up frontmatter - remove empty tags array and false draft flag
     const cleanFrontmatter = { ...frontmatter };
     if (!cleanFrontmatter.tags || cleanFrontmatter.tags.length === 0) {
       delete cleanFrontmatter.tags;
+    }
+    if (!cleanFrontmatter.draft) {
+      delete cleanFrontmatter.draft;
     }
     
     return matter.stringify(body, cleanFrontmatter);

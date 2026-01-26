@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Plus, Search } from 'lucide-react';
+import { FileText, Plus, Search, Eye, EyeOff } from 'lucide-react';
 import { BlogPost } from '../lib/file-system';
 import { parseMDX } from '../lib/mdx-parser';
 
@@ -12,6 +12,7 @@ interface FileManagerProps {
 
 export function FileManager({ posts, selectedPost, onSelectPost, onNewPost }: FileManagerProps) {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [showDrafts, setShowDrafts] = React.useState(true);
 
   // Parse posts and sort by date
   const postsWithMeta = React.useMemo(() => {
@@ -39,19 +40,29 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost }: Fi
     });
   }, [posts]);
 
-  // Filter posts based on search query
+  // Filter posts based on search query and draft status
   const filteredPosts = React.useMemo(() => {
-    if (!searchQuery.trim()) return postsWithMeta;
-    
-    const query = searchQuery.toLowerCase();
-    return postsWithMeta.filter(({ frontmatter }) => {
-      return (
-        frontmatter.title.toLowerCase().includes(query) ||
-        frontmatter.description.toLowerCase().includes(query) ||
-        frontmatter.tags?.some(tag => tag.toLowerCase().includes(query))
-      );
-    });
-  }, [postsWithMeta, searchQuery]);
+    let filtered = postsWithMeta;
+
+    // Filter by draft status
+    if (!showDrafts) {
+      filtered = filtered.filter(({ frontmatter }) => !frontmatter.draft);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(({ frontmatter }) => {
+        return (
+          frontmatter.title.toLowerCase().includes(query) ||
+          frontmatter.description.toLowerCase().includes(query) ||
+          frontmatter.tags?.some(tag => tag.toLowerCase().includes(query))
+        );
+      });
+    }
+
+    return filtered;
+  }, [postsWithMeta, searchQuery, showDrafts]);
 
   return (
     <div className="flex flex-col h-full bg-gray-850 border-r border-gray-700">
@@ -59,13 +70,24 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost }: Fi
       <div className="p-3 border-b border-gray-700 bg-gray-800">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-sm text-gray-200">Posts</h2>
-          <button
-            onClick={onNewPost}
-            className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700"
-            title="New Post"
-          >
-            <Plus size={16} />
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowDrafts(!showDrafts)}
+              className={`p-1.5 rounded hover:bg-gray-700 ${
+                showDrafts ? 'bg-gray-700 text-yellow-400' : 'text-gray-400'
+              }`}
+              title={showDrafts ? 'Hide drafts' : 'Show drafts'}
+            >
+              {showDrafts ? <Eye size={16} /> : <EyeOff size={16} />}
+            </button>
+            <button
+              onClick={onNewPost}
+              className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700"
+              title="New Post"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Search */}
@@ -102,9 +124,16 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost }: Fi
                 <div className="flex items-start gap-2">
                   <FileText size={14} className="text-gray-500 mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm text-gray-200 truncate">
-                      {frontmatter.title || post.name}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium text-sm text-gray-200 truncate">
+                        {frontmatter.title || post.name}
+                      </h3>
+                      {frontmatter.draft && (
+                        <span className="text-xs px-1.5 py-0.5 bg-yellow-900/40 text-yellow-300 rounded flex-shrink-0">
+                          DRAFT
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-500 mt-0.5">
                       {frontmatter.date}
                     </p>

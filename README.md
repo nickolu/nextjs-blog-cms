@@ -10,6 +10,7 @@ A lightweight, browser-based CMS for managing MDX blog posts. Runs entirely clie
 - ✅ **AI Autocomplete** - Smart text suggestions powered by OpenAI
 - ✅ **MDX Support** - Full frontmatter and markdown support
 - ✅ **Real-time Validation** - Instant feedback on required fields
+- ✅ **Draft Mode** - Mark posts as drafts to exclude from publishing
 - ✅ **Search & Filter** - Quickly find posts
 - ✅ **Keyboard Shortcuts** - Save with Ctrl+S / Cmd+S
 - ✅ **Persistent Sessions** - Remembers your directory selection
@@ -62,6 +63,7 @@ The CMS supports the following frontmatter fields:
 - **description** (required) - Brief description for SEO
 - **author** (required) - Author name
 - **tags** (optional) - Array of tags
+- **draft** (optional) - Boolean flag to mark post as draft
 
 ## File Structure
 
@@ -94,6 +96,24 @@ The CMS supports the following frontmatter fields:
 - **Parsing**: gray-matter (MDX frontmatter)
 - **Icons**: Lucide React
 - **Storage**: IndexedDB (for directory handle persistence)
+
+## Draft Mode
+
+The CMS includes a draft mode feature that allows you to work on posts without publishing them:
+
+### Usage
+
+1. **Mark as Draft**: Check the "Draft" checkbox at the top of the Post Metadata section
+2. **Draft Indicator**: Draft posts show a yellow "DRAFT" badge in the sidebar
+3. **Filter Drafts**: Click the eye icon in the sidebar header to show/hide draft posts
+4. **Publishing**: Uncheck the "Draft" checkbox when ready to publish
+
+### How It Works
+
+- When a post is marked as draft, `draft: true` is added to the frontmatter
+- Draft posts can be hidden from the post list by clicking the eye icon
+- The draft flag is automatically removed from the frontmatter when unchecked
+- Your static site generator can filter out draft posts during build
 
 ## AI Autocomplete
 
