@@ -91,6 +91,19 @@ export async function createFile(
   }
 }
 
+// Delete a file
+export async function deleteFile(
+  dirHandle: FileSystemDirectoryHandle,
+  filename: string
+): Promise<void> {
+  try {
+    await dirHandle.removeEntry(filename);
+  } catch (err) {
+    console.error('Error deleting file:', err);
+    throw err;
+  }
+}
+
 // IndexedDB helper for storing directory handle
 const DB_NAME = 'blog-cms-db';
 const STORE_NAME = 'directory-handles';

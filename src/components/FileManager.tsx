@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Plus, Search, Eye, EyeOff } from 'lucide-react';
+import { FileText, Plus, Search, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { BlogPost } from '../lib/file-system';
 import { parseMDX } from '../lib/mdx-parser';
 
@@ -8,11 +8,13 @@ interface FileManagerProps {
   selectedPost: BlogPost | null;
   onSelectPost: (post: BlogPost) => void;
   onNewPost: () => void;
+  onDeletePost: (post: BlogPost) => void;
 }
 
-export function FileManager({ posts, selectedPost, onSelectPost, onNewPost }: FileManagerProps) {
+export function FileManager({ posts, selectedPost, onSelectPost, onNewPost, onDeletePost }: FileManagerProps) {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [showDrafts, setShowDrafts] = React.useState(true);
+  const [hoveredPost, setHoveredPost] = React.useState<string | null>(null);
 
   // Parse posts and sort by date
   const postsWithMeta = React.useMemo(() => {
@@ -115,9 +117,11 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost }: Fi
               <button
                 key={post.name}
                 onClick={() => onSelectPost(post)}
+                onMouseEnter={() => setHoveredPost(post.name)}
+                onMouseLeave={() => setHoveredPost(null)}
                 className={`w-full text-left px-3 py-2.5 hover:bg-gray-800 transition-colors border-l-2 ${
-                  selectedPost?.name === post.name 
-                    ? 'bg-gray-800 border-blue-500' 
+                  selectedPost?.name === post.name
+                    ? 'bg-gray-800 border-blue-500'
                     : 'border-transparent'
                 }`}
               >
@@ -150,6 +154,18 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost }: Fi
                       </div>
                     )}
                   </div>
+                  {hoveredPost === post.name && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeletePost(post);
+                      }}
+                      className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded flex-shrink-0"
+                      title="Delete post"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
               </button>
             ))}

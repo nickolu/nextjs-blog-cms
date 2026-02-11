@@ -4,11 +4,13 @@ import { FileManager } from './components/FileManager';
 import { FrontmatterForm } from './components/FrontmatterForm';
 import { Editor } from './components/Editor';
 import { SettingsDialog } from './components/SettingsDialog';
+import { DeleteConfirmDialog } from './components/DeleteConfirmDialog';
 import {
   openDirectory,
   listMDXFiles,
   writeFile,
   createFile,
+  deleteFile,
   getSavedDirectoryHandle,
   getSavedDirectoryHandleWithoutPermission,
   requestDirectoryPermission,
@@ -46,6 +48,9 @@ function App() {
   const [metadataOpen, setMetadataOpen] = React.useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [settingsVersion, setSettingsVersion] = React.useState(0);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [postToDelete, setPostToDelete] = React.useState<BlogPost | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   // Check for saved directory handle on mount
   React.useEffect(() => {
@@ -242,6 +247,57 @@ function App() {
     setSettingsVersion((v) => v + 1);
   };
 
+  // Handle delete post
+  const handleDeletePost = (post: BlogPost) => {
+    setPostToDelete(post);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!postToDelete || !directoryHandle) return;
+
+    setIsDeleting(true);
+    try {
+      // Delete the file
+      await deleteFile(directoryHandle, postToDelete.name);
+
+      // Update posts list
+      const updatedPosts = posts.filter(p => p.name !== postToDelete.name);
+      setPosts(updatedPosts);
+
+      // Handle edge case: deleting currently selected post
+      if (selectedPost?.name === postToDelete.name) {
+        // Clear editor if deleting currently selected post
+        setSelectedPost(null);
+        setFrontmatter({
+          title: '',
+          date: '',
+          description: '',
+          author: 'Nickolus Cunningham',
+          tags: [],
+        });
+        setBody('');
+        setIsNewPost(false);
+        setErrors([]);
+        setSaveStatus('idle');
+      }
+
+      // Close dialog
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+      setErrors(['Failed to delete post. Please try again.']);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setPostToDelete(null);
+  };
+
   // Check if File System Access API is supported
   if (!isFileSystemAccessSupported()) {
     return (
@@ -379,6 +435,7 @@ function App() {
               selectedPost={selectedPost}
               onSelectPost={handleSelectPost}
               onNewPost={handleNewPost}
+              onDeletePost={handleDeletePost}
             />
           </div>
         )}
@@ -430,6 +487,15 @@ function App() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         onSettingsChange={handleSettingsChange}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        isOpen={deleteDialogOpen}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        postTitle={postToDelete ? parseMDX(postToDelete.content).frontmatter.title || postToDelete.name : ''}
+        isDeleting={isDeleting}
       />
     </div>
   );
