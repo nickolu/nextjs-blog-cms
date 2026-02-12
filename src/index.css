@@ -133,12 +133,142 @@
   .bg-gray-850 {
     background-color: #1a1d23;
   }
-  
+
   .bg-gray-750 {
     background-color: #2d3139;
   }
-  
+
   .bg-gray-950 {
     background-color: #0d0f12;
   }
+}
+
+/* Writing Assistant Styles */
+
+/* Suggestion highlights */
+.suggestion-highlight {
+  border-bottom: 2px solid;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.suggestion-highlight:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Category-specific colors */
+.suggestion-grammar,
+.suggestion-syntax {
+  border-color: #ef4444; /* Red for errors */
+}
+
+.suggestion-style {
+  border-color: #3b82f6; /* Blue for style */
+}
+
+.suggestion-clarity {
+  border-color: #8b5cf6; /* Purple for clarity */
+}
+
+/* Loading indicator */
+.checking-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: #3b82f6;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Tooltip styling */
+.writing-suggestion-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  padding: 12px;
+  min-width: 300px;
+  max-width: 400px;
+  font-size: 14px;
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #374151;
+}
+
+.tooltip-body {
+  margin-bottom: 12px;
+}
+
+.tooltip-body label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+
+.diff-view {
+  font-size: 14px;
+  padding: 8px;
+  background: #111827;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.reasoning {
+  padding: 8px;
+  background: #111827;
+  border-radius: 4px;
+}
+
+.tooltip-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.tooltip-actions button {
+  transition: background-color 0.2s;
+}
+
+/* Category badge */
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.category-badge.error {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+.category-badge.warning {
+  background: #78350f;
+  color: #fcd34d;
+}
+
+.category-badge.suggestion {
+  background: #1e3a8a;
+  color: #93c5fd;
 }

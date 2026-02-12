@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { getSettings } from './settings';
+import { LLMSuggestion, Suggestion } from '../types/writing-assistant';
 
 // Initialize OpenAI client
 let openai: OpenAI | null = null;
@@ -303,5 +304,213 @@ export async function rewriteWithFeedback(context: RewriteContext): Promise<stri
   } catch (error) {
     console.error('AI rewrite error:', error);
     return null;
+  }
+}
+
+// Writing Assistant - Sentence Suggestions
+
+export interface SentenceContext {
+  sentence: string;
+  precedingText: string;
+  writingStyle: string;
+  checkGrammar: boolean;
+  checkSyntax: boolean;
+  checkStyle: boolean;
+  checkClarity: boolean;
+}
+
+// Cache for sentence suggestions
+const suggestionCache = new Map<string, { suggestions: Suggestion[]; timestamp: number }>();
+const SUGGESTION_CACHE_TTL = 60 * 60 * 1000; // 60 minutes
+
+function getSuggestionCacheKey(context: SentenceContext): string {
+  return `${context.sentence}|${context.writingStyle}|${context.checkGrammar}|${context.checkSyntax}|${context.checkStyle}|${context.checkClarity}`;
+}
+
+function getCachedSuggestions(context: SentenceContext): Suggestion[] | null {
+  const key = getSuggestionCacheKey(context);
+  const cached = suggestionCache.get(key);
+
+  if (cached && Date.now() - cached.timestamp < SUGGESTION_CACHE_TTL) {
+    return cached.suggestions;
+  }
+
+  if (cached) {
+    suggestionCache.delete(key);
+  }
+
+  return null;
+}
+
+function setCachedSuggestions(context: SentenceContext, suggestions: Suggestion[]): void {
+  const key = getSuggestionCacheKey(context);
+  suggestionCache.set(key, { suggestions, timestamp: Date.now() });
+
+  // Limit cache size
+  if (suggestionCache.size > 1000) {
+    const firstKey = suggestionCache.keys().next().value;
+    if (firstKey) {
+      suggestionCache.delete(firstKey);
+    }
+  }
+}
+
+export async function getSentenceSuggestions(
+  context: SentenceContext,
+  sentenceHash: string
+): Promise<Suggestion[]> {
+  const client = getOpenAIClient();
+  if (!client) {
+    return [];
+  }
+
+  // Check cache first
+  const cached = getCachedSuggestions(context);
+  if (cached) {
+    // Return cached suggestions with new IDs
+    return cached.map(s => ({
+      ...s,
+      id: crypto.randomUUID(),
+      sentenceHash,
+    }));
+  }
+
+  // Build enabled checks list
+  const enabledChecks: string[] = [];
+  if (context.checkGrammar) enabledChecks.push('grammar');
+  if (context.checkSyntax) enabledChecks.push('syntax');
+  if (context.checkStyle) enabledChecks.push('style');
+  if (context.checkClarity) enabledChecks.push('clarity');
+
+  // If no checks enabled, return empty
+  if (enabledChecks.length === 0) {
+    return [];
+  }
+
+  try {
+    const settings = getSettings();
+
+    const systemPrompt = `You are a professional writing assistant specializing in grammar, syntax, style, and clarity improvement.
+Analyze sentences and return structured feedback as JSON array.
+
+For each issue:
+1. originalText - Exact text span with issue
+2. suggestedText - Recommended replacement
+3. category - 'grammar', 'syntax', 'style', or 'clarity'
+4. severity - 'error', 'warning', or 'suggestion'
+5. reasoning - Brief explanation (1 sentence)
+
+Guidelines:
+- Grammar/syntax errors are highest priority
+- Style suggestions should match the user's writing style preference (if provided)
+- Only suggest meaningful improvements
+- Return [] if sentence is correct
+
+Respond with JSON array only.`;
+
+    let userPrompt = '';
+
+    if (context.precedingText) {
+      userPrompt += `Context (preceding text):\n${context.precedingText}\n\n`;
+    }
+
+    userPrompt += `Sentence to review:\n"${context.sentence}"\n\n`;
+
+    userPrompt += `Writing style preference: ${context.writingStyle || 'None specified'}\n`;
+    userPrompt += `Check for: ${enabledChecks.join(', ')}\n\n`;
+
+    userPrompt += `Return JSON array of suggestions or [] if no issues.`;
+
+    const requestParams: any = {
+      model: settings.aiAutocomplete.model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+    };
+
+    // Only set temperature if model supports it
+    if (supportsCustomTemperature(settings.aiAutocomplete.model)) {
+      requestParams.temperature = 0.3; // Lower temperature for more consistent results
+    }
+
+    const response = await client.chat.completions.create(requestParams);
+    const content = response.choices[0]?.message?.content?.trim();
+
+    if (!content) {
+      return [];
+    }
+
+    // Parse JSON response
+    let llmSuggestions: LLMSuggestion[];
+    try {
+      // Extract JSON from markdown code blocks if present
+      let jsonContent = content;
+      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        jsonContent = jsonMatch[1];
+      }
+
+      llmSuggestions = JSON.parse(jsonContent);
+
+      if (!Array.isArray(llmSuggestions)) {
+        console.error('LLM response is not an array:', content);
+        return [];
+      }
+    } catch (error) {
+      console.error('Failed to parse LLM suggestions:', error, content);
+      return [];
+    }
+
+    // Convert LLM suggestions to Suggestion objects
+    const suggestions: Suggestion[] = [];
+
+    for (const llmSugg of llmSuggestions) {
+      // Validate suggestion
+      if (
+        !llmSugg.originalText ||
+        !llmSugg.suggestedText ||
+        !llmSugg.category ||
+        !llmSugg.severity ||
+        !llmSugg.reasoning
+      ) {
+        console.warn('Invalid suggestion format:', llmSugg);
+        continue;
+      }
+
+      // Filter out suggestions for disabled check types
+      if (llmSugg.category === 'grammar' && !context.checkGrammar) continue;
+      if (llmSugg.category === 'syntax' && !context.checkSyntax) continue;
+      if (llmSugg.category === 'style' && !context.checkStyle) continue;
+      if (llmSugg.category === 'clarity' && !context.checkClarity) continue;
+
+      // Verify originalText exists in sentence
+      const index = context.sentence.indexOf(llmSugg.originalText);
+      if (index === -1) {
+        console.warn('Original text not found in sentence:', llmSugg.originalText);
+        continue;
+      }
+
+      // Create suggestion (positions will be set by the extension)
+      suggestions.push({
+        id: crypto.randomUUID(),
+        sentenceHash,
+        startPos: 0, // Will be set by extension
+        endPos: 0, // Will be set by extension
+        originalText: llmSugg.originalText,
+        suggestedText: llmSugg.suggestedText,
+        category: llmSugg.category,
+        severity: llmSugg.severity,
+        reasoning: llmSugg.reasoning,
+      });
+    }
+
+    // Cache the suggestions (without positions)
+    setCachedSuggestions(context, suggestions);
+
+    return suggestions;
+  } catch (error) {
+    console.error('Error getting sentence suggestions:', error);
+    return [];
   }
 }

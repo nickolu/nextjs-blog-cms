@@ -4,6 +4,17 @@ export interface Settings {
     model: string;
     systemPrompt?: string;
   };
+  writingAssistant: {
+    enabled: boolean;
+    checkGrammar: boolean;
+    checkSyntax: boolean;
+    checkStyle: boolean;
+    checkClarity: boolean;
+    writingStyle: string;
+    triggerMode: 'on-sentence-end' | 'on-pause';
+    debounceDelay: number;
+    showSeverity: ('error' | 'warning' | 'suggestion')[];
+  };
 }
 
 const SETTINGS_STORAGE_KEY = 'blog-cms-settings';
@@ -13,6 +24,17 @@ const DEFAULT_SETTINGS: Settings = {
     enabled: true,
     model: 'gpt-5-mini',
     systemPrompt: undefined,
+  },
+  writingAssistant: {
+    enabled: false,
+    checkGrammar: true,
+    checkSyntax: true,
+    checkStyle: false,
+    checkClarity: true,
+    writingStyle: '',
+    triggerMode: 'on-sentence-end',
+    debounceDelay: 2000,
+    showSeverity: ['error', 'warning', 'suggestion'],
   },
 };
 
@@ -28,6 +50,10 @@ export function loadSettings(): Settings {
         aiAutocomplete: {
           ...DEFAULT_SETTINGS.aiAutocomplete,
           ...parsed.aiAutocomplete,
+        },
+        writingAssistant: {
+          ...DEFAULT_SETTINGS.writingAssistant,
+          ...parsed.writingAssistant,
         },
       };
     }
@@ -60,6 +86,10 @@ export function updateSettings(updates: Partial<Settings>): Settings {
     aiAutocomplete: {
       ...current.aiAutocomplete,
       ...(updates.aiAutocomplete || {}),
+    },
+    writingAssistant: {
+      ...current.writingAssistant,
+      ...(updates.writingAssistant || {}),
     },
   };
   saveSettings(updated);

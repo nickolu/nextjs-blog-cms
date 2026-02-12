@@ -140,6 +140,163 @@ export function SettingsDialog({ isOpen, onClose, onSettingsChange }: SettingsDi
                 </p>
               </div>
             </div>
+
+            {/* Writing Assistant Section */}
+            <div>
+              <h3 className="text-md font-semibold text-gray-200 mb-4">Writing Assistant</h3>
+
+              {/* Enable/Disable Toggle */}
+              <div className="mb-4">
+                <label className="flex items-center justify-between p-3 bg-gray-900 rounded border border-gray-700 hover:border-gray-600 cursor-pointer">
+                  <span className="text-sm text-gray-300">Enable Writing Assistant</span>
+                  <input
+                    type="checkbox"
+                    checked={settings.writingAssistant.enabled}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        writingAssistant: {
+                          ...settings.writingAssistant,
+                          enabled: e.target.checked,
+                        },
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                </label>
+              </div>
+
+              {/* Check Types */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Check For
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center p-2 bg-gray-900 rounded border border-gray-700 hover:border-gray-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.writingAssistant.checkGrammar}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          writingAssistant: {
+                            ...settings.writingAssistant,
+                            checkGrammar: e.target.checked,
+                          },
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="ml-2 text-sm text-gray-300">Grammar errors</span>
+                  </label>
+
+                  <label className="flex items-center p-2 bg-gray-900 rounded border border-gray-700 hover:border-gray-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.writingAssistant.checkSyntax}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          writingAssistant: {
+                            ...settings.writingAssistant,
+                            checkSyntax: e.target.checked,
+                          },
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="ml-2 text-sm text-gray-300">Syntax issues</span>
+                  </label>
+
+                  <label className="flex items-center p-2 bg-gray-900 rounded border border-gray-700 hover:border-gray-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.writingAssistant.checkClarity}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          writingAssistant: {
+                            ...settings.writingAssistant,
+                            checkClarity: e.target.checked,
+                          },
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="ml-2 text-sm text-gray-300">Clarity improvements</span>
+                  </label>
+
+                  <label className="flex items-center p-2 bg-gray-900 rounded border border-gray-700 hover:border-gray-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.writingAssistant.checkStyle}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          writingAssistant: {
+                            ...settings.writingAssistant,
+                            checkStyle: e.target.checked,
+                          },
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="ml-2 text-sm text-gray-300">Style suggestions</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Writing Style */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Writing Style (Optional)
+                </label>
+                <textarea
+                  value={settings.writingAssistant.writingStyle}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      writingAssistant: {
+                        ...settings.writingAssistant,
+                        writingStyle: e.target.value,
+                      },
+                    })
+                  }
+                  placeholder="e.g., Hemingwayesque writing style but entirely in 3rd person"
+                  rows={3}
+                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Describe your preferred writing style. Leave empty for general style suggestions.
+                </p>
+              </div>
+
+              {/* Trigger Mode */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Check Trigger
+                </label>
+                <select
+                  value={settings.writingAssistant.triggerMode}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      writingAssistant: {
+                        ...settings.writingAssistant,
+                        triggerMode: e.target.value as 'on-sentence-end' | 'on-pause',
+                      },
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-300 focus:outline-none focus:border-blue-500"
+                >
+                  <option value="on-sentence-end">After completing a sentence</option>
+                  <option value="on-pause">After pausing (2 seconds)</option>
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  When to check your writing for suggestions
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 

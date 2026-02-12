@@ -8,13 +8,13 @@ import Placeholder from '@tiptap/extension-placeholder';
 import HardBreak from '@tiptap/extension-hard-break';
 import TurndownService from 'turndown';
 import { marked } from 'marked';
-import { 
-  Bold, 
-  Italic, 
-  Heading1, 
-  Heading2, 
-  Heading3, 
-  List, 
+import {
+  Bold,
+  Italic,
+  Heading1,
+  Heading2,
+  Heading3,
+  List,
   ListOrdered,
   Code,
   Link as LinkIcon,
@@ -22,12 +22,18 @@ import {
   Undo,
   Redo,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  CheckCircle,
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import { AutocompleteExtension } from '../extensions/AutocompleteExtension';
+import { WritingAssistantExtension, writingAssistantPluginKey } from '../extensions/WritingAssistantExtension';
 import { isAICompletionAvailable } from '../lib/ai-completion';
 import { ReviewDialog } from './ReviewDialog';
+import { WritingSuggestionTooltip } from './WritingSuggestionTooltip';
 import { getSettings, updateSettings } from '../lib/settings';
+import { Suggestion } from '../types/writing-assistant';
 
 interface EditorProps {
   content: string;
@@ -47,8 +53,14 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
   const isUpdatingRef = React.useRef(false);
   const [autocompleteEnabled, setAutocompleteEnabled] = React.useState(() => getSettings().aiAutocomplete.enabled);
+  const [writingAssistantEnabled, setWritingAssistantEnabled] = React.useState(() => getSettings().writingAssistant.enabled);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = React.useState(false);
   const [selectedTextForReview, setSelectedTextForReview] = React.useState('');
+  const [activeTooltip, setActiveTooltip] = React.useState<{
+    suggestion: Suggestion;
+    position: { top: number; left: number };
+  } | null>(null);
+  const [isWritingAssistantChecking, setIsWritingAssistantChecking] = React.useState(false);
   const aiAvailable = isAICompletionAvailable();
 
   const editor = useEditor({
@@ -77,6 +89,11 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
         postTitle,
         postDescription,
       }),
+      WritingAssistantExtension.configure({
+        enabled: writingAssistantEnabled,
+        debounceDelay: getSettings().writingAssistant.debounceDelay,
+        settings: getSettings().writingAssistant,
+      }),
     ],
     content: '',
     onUpdate: ({ editor }) => {
@@ -94,25 +111,79 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
   // Update autocomplete extension options when settings change
   React.useEffect(() => {
     if (!editor) return;
-    
+
     // Update options using updateAttributes to trigger reactivity
     const autocompleteExt = editor.extensionManager.extensions.find(
       (ext) => ext.name === 'autocomplete'
     );
-    
+
     if (autocompleteExt) {
       const newEnabled = autocompleteEnabled && aiAvailable;
       console.log('[Editor useEffect] Setting enabled to:', newEnabled);
-      
+
       // Update options for context (title/description)
       (autocompleteExt.options as any).postTitle = postTitle;
       (autocompleteExt.options as any).postDescription = postDescription;
-      
+
       // Dispatch transaction to update plugin state
       const tr = editor.state.tr.setMeta('setAutocompleteEnabled', newEnabled);
       editor.view.dispatch(tr);
     }
   }, [editor, autocompleteEnabled, aiAvailable, postTitle, postDescription]);
+
+  // Update writing assistant extension when settings change
+  React.useEffect(() => {
+    if (!editor) return;
+
+    const writingAssistantExt = editor.extensionManager.extensions.find(
+      (ext) => ext.name === 'writingAssistant'
+    );
+
+    if (writingAssistantExt) {
+      const newEnabled = writingAssistantEnabled && aiAvailable;
+
+      // Update options
+      (writingAssistantExt.options as any).enabled = newEnabled;
+      (writingAssistantExt.options as any).settings = getSettings().writingAssistant;
+
+      // Dispatch transaction to update plugin state
+      const tr = editor.state.tr.setMeta('setWritingAssistantEnabled', newEnabled);
+      editor.view.dispatch(tr);
+    }
+  }, [editor, writingAssistantEnabled, aiAvailable]);
+
+  // Listen for tooltip events from the plugin
+  React.useEffect(() => {
+    if (!editor) return;
+
+    const handleTransaction = () => {
+      const pluginState = writingAssistantPluginKey.getState(editor.state);
+      if (!pluginState) return;
+
+      // Update tooltip state
+      if (pluginState.activeTooltip) {
+        const suggestion = pluginState.suggestions.find(
+          s => s.id === pluginState.activeTooltip!.suggestionId
+        );
+        if (suggestion) {
+          setActiveTooltip({
+            suggestion,
+            position: pluginState.activeTooltip.position,
+          });
+        }
+      } else {
+        setActiveTooltip(null);
+      }
+
+      // Update checking state
+      setIsWritingAssistantChecking(pluginState.isChecking);
+    };
+
+    editor.on('transaction', handleTransaction);
+    return () => {
+      editor.off('transaction', handleTransaction);
+    };
+  }, [editor]);
 
   // Convert markdown to HTML and set it in the editor only on initial load or external content changes
   React.useEffect(() => {
@@ -173,6 +244,40 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
         enabled: newEnabled,
       },
     });
+  };
+
+  const handleWritingAssistantToggle = () => {
+    const newEnabled = !writingAssistantEnabled;
+    setWritingAssistantEnabled(newEnabled);
+    updateSettings({
+      writingAssistant: {
+        ...getSettings().writingAssistant,
+        enabled: newEnabled,
+      },
+    });
+  };
+
+  const handleAcceptSuggestion = (suggestionId: string) => {
+    if (!editor) return;
+    editor.chain().acceptSuggestion(suggestionId).run();
+    setActiveTooltip(null);
+  };
+
+  const handleIgnoreSuggestion = (suggestionId: string) => {
+    if (!editor) return;
+    editor.chain().ignoreSuggestion(suggestionId).run();
+    setActiveTooltip(null);
+  };
+
+  const handleDismissTooltip = () => {
+    if (!editor) return;
+    editor.chain().hideSuggestionTooltip().run();
+    setActiveTooltip(null);
+  };
+
+  const handleCheckWritingNow = () => {
+    if (!editor) return;
+    editor.chain().focus().checkWritingNow().run();
   };
 
   const handleAIReview = () => {
@@ -324,25 +429,61 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
         {aiAvailable && (
           <>
             <div className="w-px bg-gray-600 mx-1" />
-            
+
             <button
               onClick={handleAutocompleteToggle}
-              className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${
-                autocompleteEnabled ? 'bg-gray-700 text-yellow-400' : ''
+              className={`p-1.5 rounded ${
+                autocompleteEnabled ? 'bg-gray-700 text-yellow-400' : 'text-gray-400 hover:bg-gray-700'
               }`}
-              title={autocompleteEnabled ? 'AI Autocomplete: On' : 'AI Autocomplete: Off'}
+              title={`AI Autocomplete - ${autocompleteEnabled ? 'Enabled' : 'Disabled'}\nAutomatically suggests text completions as you write`}
             >
               <Sparkles size={16} />
             </button>
-            
+
             <button
               onClick={handleAIReview}
               className="p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200"
-              title="AI Review"
+              title="AI Review - Get feedback on your writing\nSelect text or review entire document"
             >
               <MessageSquare size={16} />
             </button>
+
+            <button
+              onClick={handleWritingAssistantToggle}
+              className={`p-1.5 rounded ${
+                writingAssistantEnabled
+                  ? 'bg-gray-700 text-green-400'
+                  : 'text-gray-400 hover:bg-gray-700'
+              }`}
+              title={`Writing Assistant - ${writingAssistantEnabled ? 'Enabled' : 'Disabled'}\nReal-time grammar, style, and clarity suggestions`}
+            >
+              <CheckCircle size={16} />
+            </button>
+
+            {writingAssistantEnabled && (
+              <button
+                onClick={handleCheckWritingNow}
+                className="p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200"
+                title="Check Now - Manually check current sentence\nClick to analyze the sentence at cursor position"
+                disabled={isWritingAssistantChecking}
+              >
+                <RefreshCw size={16} className={isWritingAssistantChecking ? 'opacity-50' : ''} />
+              </button>
+            )}
           </>
+        )}
+
+        {/* Spacer to push loader to the right */}
+        <div className="flex-1" />
+
+        {/* Loading indicator - right aligned */}
+        {aiAvailable && isWritingAssistantChecking && writingAssistantEnabled && (
+          <div
+            className="flex items-center text-blue-400 px-2"
+            title="Writing Assistant is analyzing your text..."
+          >
+            <Loader2 size={16} className="animate-spin" />
+          </div>
         )}
       </div>
 
@@ -360,6 +501,17 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
         postDescription={postDescription}
         onRewrite={handleRewrite}
       />
+
+      {/* Writing Suggestion Tooltip */}
+      {activeTooltip && (
+        <WritingSuggestionTooltip
+          suggestion={activeTooltip.suggestion}
+          position={activeTooltip.position}
+          onAccept={handleAcceptSuggestion}
+          onIgnore={handleIgnoreSuggestion}
+          onDismiss={handleDismissTooltip}
+        />
+      )}
     </div>
   );
 }
