@@ -36,17 +36,17 @@ export function DeleteConfirmDialog({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
+      <div className="theme-bg-secondary rounded-lg shadow-xl w-full max-w-md">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b theme-border">
           <div className="flex items-center gap-2">
             <AlertCircle className="text-red-400" size={20} />
-            <h2 className="text-lg font-semibold text-gray-100">Delete Post</h2>
+            <h2 className="text-lg font-semibold theme-text-primary">Delete Post</h2>
           </div>
           <button
             onClick={onClose}
             disabled={isDeleting}
-            className="text-gray-400 hover:text-gray-200 p-1 rounded hover:bg-gray-700 disabled:opacity-50"
+            className="theme-text-muted hover:theme-text-primary p-1 rounded hover:bg-gray-700 disabled:opacity-50"
           >
             <X size={20} />
           </button>
@@ -54,10 +54,10 @@ export function DeleteConfirmDialog({
 
         {/* Content */}
         <div className="p-6">
-          <p className="text-gray-300 mb-2">
+          <p className="theme-text-secondary mb-2">
             Are you sure you want to delete this post?
           </p>
-          <p className="text-sm font-medium text-gray-100 bg-gray-900 px-3 py-2 rounded border border-gray-700">
+          <p className="text-sm font-medium theme-text-primary theme-bg-primary px-3 py-2 rounded border theme-border">
             {postTitle}
           </p>
           <p className="text-sm text-red-400 mt-3">
@@ -66,11 +66,11 @@ export function DeleteConfirmDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-700">
+        <div className="flex items-center justify-end gap-3 p-4 border-t theme-border">
           <button
             onClick={onClose}
             disabled={isDeleting}
-            className="px-4 py-2 text-sm text-gray-300 hover:text-gray-100 hover:bg-gray-700 rounded disabled:opacity-50"
+            className="px-4 py-2 text-sm theme-text-secondary hover:theme-text-primary hover:bg-gray-700 rounded disabled:opacity-50"
           >
             Cancel
           </button>

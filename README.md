@@ -1,190 +1,356 @@
 # Blog CMS
 
-A lightweight, browser-based CMS for managing MDX blog posts. Runs entirely client-side using the File System Access API - no server required!
+> A modern, browser-based content management system for MDX blog posts. No backend required.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Made with React](https://img.shields.io/badge/Made%20with-React-61dafb)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+
+Blog CMS is a lightweight, powerful content management system that runs entirely in your browser. Using the File System Access API, it provides direct read/write access to your local blog directory without needing a server, database, or complex setup.
+
+## ✨ What's New
+
+**🎨 Color Themes** - Customize your editing experience with 5 beautiful themes! Switch between Dark, Deep Blue, Midnight, Forest, and Monokai color schemes. All themes are carefully crafted with proper contrast ratios and support for all UI elements.
+
+**🔤 Expanded Font Library** - Choose from 11 Google Fonts including new additions:
+- **Monospace**: Noto Sans Mono, SUSE Mono, Xanh Mono
+- **Serif**: Noto Serif, PT Serif
+
+All fonts are organized by category in the settings dialog for easy selection.
 
 ## Features
 
-- ✅ **Browser-Based** - No backend needed, runs entirely in your browser
-- ✅ **File System Access** - Direct read/write to your local blog directory
-- ✅ **WYSIWYG Editor** - Rich text editing with TipTap
-- ✅ **AI Autocomplete** - Smart text suggestions powered by OpenAI
-- ✅ **MDX Support** - Full frontmatter and markdown support
-- ✅ **Real-time Validation** - Instant feedback on required fields
-- ✅ **Draft Mode** - Mark posts as drafts to exclude from publishing
-- ✅ **Search & Filter** - Quickly find posts
-- ✅ **Keyboard Shortcuts** - Save with Ctrl+S / Cmd+S
-- ✅ **Persistent Sessions** - Remembers your directory selection
+### Core Functionality
+- **Browser-Based** - No backend needed, runs entirely in your browser
+- **File System Access** - Direct read/write to your local blog directory
+- **MDX Support** - Full frontmatter and markdown support
+- **Real-time Validation** - Instant feedback on required fields
+- **Persistent Sessions** - Remembers your directory selection
+- **Auto-Save** - Automatic saving after 2 seconds of inactivity
+
+### Rich Text Editing
+- **WYSIWYG Editor** - Powerful rich text editing with TipTap
+- **Markdown Toolbar** - Quick access to formatting options
+- **Code Blocks** - Syntax-highlighted code blocks
+- **Images & Links** - Easy insertion of media and links
+- **Keyboard Shortcuts** - Full keyboard support for efficient editing
+
+### Customization
+- **Color Themes** - Choose from 5 carefully crafted themes (Dark, Deep Blue, Midnight, Forest, Monokai)
+- **Font Selection** - 11 Google Fonts including serif, sans-serif, and monospace options
+- **Real-time Preview** - Changes apply instantly across the entire interface
+- **Persistent Settings** - Your preferences are saved locally
+
+### AI-Powered Features
+- **AI Autocomplete** - Smart text suggestions powered by OpenAI
+- **Writing Assistant** - Grammar, style, and syntax checking
+- **Context-Aware** - Suggestions based on your post content
+- **Toggle On/Off** - Enable/disable AI features as needed
+
+### Image Management
+- **Cloudinary Integration** - Upload images directly to Cloudinary
+- **Drag & Drop** - Drag images into the editor
+- **URL Generation** - Automatic markdown image syntax generation
+- **Optimized Hosting** - CDN-backed image delivery
+
+### Organization
+- **Search & Filter** - Quickly find posts
+- **Draft Mode** - Mark posts as drafts to exclude from publishing
+- **Delete Posts** - Remove posts with confirmation dialog
+- **Post List** - Browse all posts in a clean sidebar
 
 ## Browser Support
 
 This CMS requires the File System Access API, currently supported in:
 
-- ✅ Chrome 86+
-- ✅ Edge 86+
-- ✅ Opera 72+
-- ❌ Safari (not yet)
-- ❌ Firefox (behind flag)
+| Browser | Support |
+|---------|---------|
+| Chrome 86+ | ✅ |
+| Edge 86+ | ✅ |
+| Opera 72+ | ✅ |
+| Safari | ❌ Not yet |
+| Firefox | ⚠️ Behind flag |
 
-## Getting Started
-
-### Installation
+## Quick Start
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/blog-cms.git
+cd blog-cms
+
 # Install dependencies
 pnpm install
 
-# Set up environment (optional - for AI autocomplete)
+# Copy environment template (optional - for AI features)
 cp .env.example .env.local
-# Edit .env.local and add your OpenAI API key
 
-# Run development server
+# Start development server
 pnpm dev
-
-# Build for production
-pnpm build
 ```
 
-### Usage
+Visit `http://localhost:5173` and select your blog content directory to get started.
 
-1. **Open the CMS** - Navigate to `http://localhost:5173` (or your build URL)
+## Configuration
+
+### Environment Variables
+
+Create a `.env.local` file with the following optional configurations:
+
+```bash
+# OpenAI API Configuration (for AI autocomplete & writing assistant)
+VITE_OPENAI_API_KEY=sk-your-api-key-here
+VITE_OPENAI_MODEL=gpt-4o-mini  # Options: gpt-4o-mini, gpt-4o, gpt-3.5-turbo
+
+# Cloudinary Configuration (for image uploads)
+VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+VITE_CLOUDINARY_UPLOAD_PRESET=your-upload-preset
+```
+
+### Getting API Keys
+
+**OpenAI**
+1. Sign up at [platform.openai.com](https://platform.openai.com)
+2. Navigate to API Keys section
+3. Create a new API key
+4. Add to `.env.local` as `VITE_OPENAI_API_KEY`
+
+**Cloudinary**
+1. Sign up at [cloudinary.com](https://cloudinary.com) (free tier available)
+2. Copy your Cloud Name from the dashboard
+3. Go to Settings → Upload → Add Upload Preset
+4. Set Mode: Unsigned, Folder: blog-images (optional)
+5. Copy the Preset Name and add both values to `.env.local`
+
+You can also configure these settings directly in the app by clicking the Settings icon.
+
+## Usage
+
+### Getting Started
+
+1. **Launch the CMS** - Open the app in a supported browser
 2. **Select Directory** - Click "Open Directory" and choose your `content/blog` folder
-3. **Browse Posts** - See all your existing MDX posts in the sidebar
-4. **Edit or Create** - Click a post to edit, or click "+" to create a new one
-5. **Make Changes** - Edit the metadata and content using the WYSIWYG editor
-6. **Save** - Click "Save" or press Ctrl+S / Cmd+S
-7. **Done!** - Changes are written directly to your MDX files
+3. **Grant Permission** - Allow read/write access when prompted
+4. **Browse Posts** - See all your existing MDX posts in the sidebar
+5. **Start Editing** - Click a post to edit or click "+" to create a new one
 
-## Frontmatter Fields
+### Creating a New Post
 
-The CMS supports the following frontmatter fields:
+1. Click the "+" button in the sidebar
+2. Fill in the required metadata fields:
+   - Title (required)
+   - Date (required)
+   - Description (required)
+   - Author (required)
+   - Tags (optional)
+3. Write your content in the editor
+4. Save with Ctrl+S / Cmd+S or click the Save button
 
-- **title** (required) - Post title
-- **date** (required) - Publication date (YYYY-MM-DD)
-- **description** (required) - Brief description for SEO
-- **author** (required) - Author name
-- **tags** (optional) - Array of tags
-- **draft** (optional) - Boolean flag to mark post as draft
+The file will be automatically named based on your title (e.g., "My Post Title" → `my-post-title.mdx`).
 
-## File Structure
+### Using the Writing Assistant
+
+1. Click the **ScanText** icon in the editor toolbar
+2. The assistant will analyze your content for:
+   - Grammar errors
+   - Style improvements
+   - Syntax issues
+3. Click on any suggestion to:
+   - View detailed explanation
+   - Apply the fix automatically
+   - Dismiss if not relevant
+
+### Using AI Autocomplete
+
+1. Enable by clicking the **Sparkles** (✨) icon in the toolbar
+2. Type naturally and pause for ~500ms
+3. AI suggestions appear in gray italic text
+4. Press `Tab` to accept or `Escape` to dismiss
+
+### Uploading Images
+
+**Method 1: Drag & Drop**
+- Drag an image file directly into the editor
+
+**Method 2: Toolbar Button**
+1. Click the image icon in the toolbar
+2. Select an image file
+3. Image is uploaded to Cloudinary
+4. Markdown syntax is inserted automatically
+
+**Method 3: URL**
+- Use the image icon to insert an image from a URL
+
+### Managing Drafts
+
+1. **Mark as Draft**: Check the "Draft" checkbox in Post Metadata
+2. **Draft Indicator**: Draft posts show a yellow "DRAFT" badge in the sidebar
+3. **Filter Drafts**: Click the eye icon to show/hide draft posts
+4. **Publishing**: Uncheck the "Draft" checkbox when ready to publish
+
+### Deleting Posts
+
+1. Click the trash icon next to a post in the sidebar
+2. Confirm deletion in the dialog
+3. The post file is permanently removed from your directory
+
+### Customizing Your Experience
+
+**Changing Color Themes:**
+1. Click the Settings (gear) icon in the top toolbar
+2. Scroll to the "Color Theme" section
+3. Choose from 5 themes:
+   - **Dark** - Default dark gray theme with blue accents
+   - **Deep Blue** - Navy blue theme with softer blue accents
+   - **Midnight** - Pure black theme for OLED displays
+   - **Forest** - Dark green theme with emerald accents
+   - **Monokai** - Classic Monokai editor theme with cyan accents
+4. Changes apply instantly across the entire interface
+
+**Changing Fonts:**
+1. Open Settings dialog
+2. Go to "Editor Font" dropdown
+3. Choose from 11 fonts organized by category:
+   - **System**: System Default
+   - **Sans Serif**: Inter
+   - **Serif**: Georgia, Merriweather, Noto Serif, PT Serif
+   - **Monospace**: Monospace, IBM Plex Mono, Noto Sans Mono, SUSE Mono, Xanh Mono
+4. Font changes apply immediately to the editor content
+
+## Frontmatter Schema
+
+All posts use YAML frontmatter at the top of the MDX file:
+
+```yaml
+---
+title: Your Post Title          # Required
+date: 2024-01-15               # Required (YYYY-MM-DD)
+description: Brief summary      # Required
+author: Author Name            # Required
+tags:                          # Optional
+  - javascript
+  - react
+draft: false                   # Optional (true/false)
+---
+```
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+S` / `Cmd+S` | Save current post |
+| `Tab` | Accept AI suggestion |
+| `Escape` | Dismiss AI suggestion |
+| `Ctrl+B` / `Cmd+B` | Bold text |
+| `Ctrl+I` / `Cmd+I` | Italic text |
+| `Ctrl+Z` / `Cmd+Z` | Undo |
+| `Ctrl+Shift+Z` / `Cmd+Shift+Z` | Redo |
+
+## Project Structure
 
 ```
-your-project/
-├── blog-cms/                    # CMS application
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Editor.tsx          # TipTap WYSIWYG editor
-│   │   │   ├── FileManager.tsx     # Sidebar with post list
-│   │   │   └── FrontmatterForm.tsx # Metadata form
-│   │   ├── lib/
-│   │   │   ├── file-system.ts      # File System Access API wrapper
-│   │   │   └── mdx-parser.ts       # MDX parsing utilities
-│   │   ├── App.tsx                 # Main application
-│   │   └── main.tsx                # Entry point
-│   ├── index.html
-│   ├── package.json
-│   └── README.md
-└── my-nextjs-blog/              # Your Next.js blog (or any static site)
-    └── content/
-        └── blog/                # Blog posts directory
+blog-cms/
+├── src/
+│   ├── components/
+│   │   ├── DeleteConfirmDialog.tsx    # Delete confirmation modal
+│   │   ├── Editor.tsx                 # TipTap WYSIWYG editor
+│   │   ├── FileManager.tsx            # Sidebar with post list
+│   │   ├── FrontmatterForm.tsx        # Metadata form
+│   │   ├── ImageUploadDialog.tsx      # Image upload modal
+│   │   ├── ReviewDialog.tsx           # Writing review modal
+│   │   ├── SettingsDialog.tsx         # Settings configuration
+│   │   ├── Toast.tsx                  # Toast notifications
+│   │   └── WritingSuggestionTooltip.tsx  # Suggestion tooltip
+│   ├── extensions/
+│   │   ├── AutocompleteExtension.ts   # AI autocomplete logic
+│   │   ├── ImageUploadExtension.ts    # Image upload handling
+│   │   └── WritingAssistantExtension.ts  # Writing assistant logic
+│   ├── lib/
+│   │   ├── ai-completion.ts           # OpenAI integration
+│   │   ├── cloudinary.ts              # Cloudinary integration
+│   │   ├── file-system.ts             # File System Access API wrapper
+│   │   ├── mdx-parser.ts              # MDX parsing utilities
+│   │   ├── sentence-utils.ts          # Text parsing utilities
+│   │   ├── settings.ts                # Settings management
+│   │   └── writing-assistant-storage.ts  # Suggestion caching
+│   ├── types/
+│   │   ├── cloudinary.ts              # Cloudinary types
+│   │   ├── tiptap.d.ts                # TipTap types
+│   │   └── writing-assistant.ts       # Writing assistant types
+│   ├── App.tsx                        # Main application
+│   ├── main.tsx                       # Entry point
+│   └── index.css                      # Global styles
+├── public/                            # Static assets
+├── .env.example                       # Environment template
+├── index.html                         # HTML entry
+├── package.json                       # Dependencies
+├── tailwind.config.js                 # Tailwind configuration
+├── tsconfig.json                      # TypeScript configuration
+└── vite.config.ts                     # Vite configuration
 ```
 
 ## Technology Stack
 
-- **Framework**: Vite + React + TypeScript
-- **Editor**: TipTap (WYSIWYG)
-- **Styling**: Tailwind CSS
-- **Parsing**: gray-matter (MDX frontmatter)
-- **Icons**: Lucide React
-- **Storage**: IndexedDB (for directory handle persistence)
+| Category | Technology |
+|----------|-----------|
+| Framework | Vite + React + TypeScript |
+| Editor | TipTap (ProseMirror) |
+| Styling | Tailwind CSS |
+| Parsing | gray-matter (frontmatter), marked (markdown) |
+| Icons | Lucide React |
+| Fonts | Google Fonts |
+| AI | OpenAI API |
+| Images | Cloudinary |
+| Storage | IndexedDB (directory handle persistence) |
 
-## Draft Mode
+## Security & Privacy
 
-The CMS includes a draft mode feature that allows you to work on posts without publishing them:
+The File System Access API is secure by design:
 
-### Usage
-
-1. **Mark as Draft**: Check the "Draft" checkbox at the top of the Post Metadata section
-2. **Draft Indicator**: Draft posts show a yellow "DRAFT" badge in the sidebar
-3. **Filter Drafts**: Click the eye icon in the sidebar header to show/hide draft posts
-4. **Publishing**: Uncheck the "Draft" checkbox when ready to publish
-
-### How It Works
-
-- When a post is marked as draft, `draft: true` is added to the frontmatter
-- Draft posts can be hidden from the post list by clicking the eye icon
-- The draft flag is automatically removed from the frontmatter when unchecked
-- Your static site generator can filter out draft posts during build
-
-## AI Autocomplete
-
-The CMS includes AI-powered autocomplete to help you write faster:
-
-### Setup
-
-1. Get an OpenAI API key from https://platform.openai.com/api-keys
-2. Copy `.env.example` to `.env.local`
-3. Add your API key to `.env.local`:
-   ```
-   VITE_OPENAI_API_KEY=sk-your-key-here
-   ```
-4. Restart the dev server
-
-### Usage
-
-- **Enable/Disable**: Click the sparkles (✨) icon in the toolbar
-- **Get Suggestions**: Type naturally, pause for ~500ms to see AI suggestions in gray italic text
-- **Accept**: Press `Tab` to accept the suggestion
-- **Dismiss**: Press `Escape` or keep typing to dismiss
-
-### Features
-
-- Context-aware suggestions based on your post title, description, and previous text
-- Smart caching to reduce API costs
-- Non-intrusive - only shows after you pause typing
-- Works completely offline when disabled
-
-### Privacy
-
-When AI autocomplete is enabled, your text context (last 1000 characters) is sent to OpenAI's API. The feature can be disabled at any time by clicking the sparkles icon.
-
-## Keyboard Shortcuts
-
-- `Ctrl+S` / `Cmd+S` - Save current post
-- `Tab` - Accept AI suggestion (when visible)
-- `Escape` - Dismiss AI suggestion (when visible)
-- `Ctrl+B` / `Cmd+B` - Bold (in editor)
-- `Ctrl+I` / `Cmd+I` - Italic (in editor)
-
-## Security
-
-The File System Access API is secure:
-
-- ✅ Requires explicit user permission
+- ✅ Requires explicit user permission for each directory
 - ✅ Only accesses directories you explicitly grant
-- ✅ No network requests needed
-- ✅ Works completely offline
-- ✅ Can't accidentally access system files
+- ✅ No automatic access to system files
+- ✅ Permissions can be revoked at any time
+- ✅ Works completely offline (except AI features)
 
-## Troubleshooting
+**AI Features Privacy:**
+- When AI features are enabled, your text context is sent to OpenAI's API
+- Only the last 1000 characters are sent for autocomplete
+- All AI features can be disabled at any time
+- No data is stored on external servers (except during API calls)
 
-### "Browser Not Supported" message
+## Deployment
 
-Use Chrome, Edge, or Opera. Safari and Firefox don't yet support the File System Access API.
+The CMS can be deployed to any static hosting service:
 
-### Changes not saving
+### Vercel
 
-Make sure you granted "readwrite" permission when selecting the directory.
+```bash
+npm i -g vercel
+vercel
+```
 
-### Post not appearing in list
+Or connect your GitHub repository in the Vercel dashboard for automatic deployments.
 
-Ensure the file ends with `.mdx` or `.md` and has valid frontmatter.
+### Netlify
 
-### AI autocomplete not working
+```bash
+npm i -g netlify-cli
+pnpm build
+netlify deploy --prod --dir=dist
+```
 
-- Make sure you've set `VITE_OPENAI_API_KEY` in `.env.local`
-- Restart the dev server after adding environment variables
-- Check browser console for any API errors
-- Ensure the sparkles (✨) icon in the toolbar is highlighted (enabled)
+### GitHub Pages
+
+```bash
+pnpm build
+# Deploy the dist/ folder to GitHub Pages
+```
+
+### Other Platforms
+
+Works with any static host: Cloudflare Pages, Firebase Hosting, AWS S3 + CloudFront, Render, Railway, etc.
+
+**Note:** Remember to set environment variables in your hosting provider's dashboard if using AI or image upload features.
 
 ## Development
 
@@ -197,93 +363,84 @@ pnpm build
 
 # Preview production build
 pnpm preview
+
+# Type check
+pnpm tsc --noEmit
+
+# Lint
+pnpm eslint src/
 ```
 
-## Deployment
+## Troubleshooting
 
-The CMS can be deployed to any static hosting service. Since it runs entirely in the browser and requires the File System Access API, users will need to grant permission to their local blog directory.
+### "Browser Not Supported" message
+Use Chrome, Edge, or Opera. Safari and Firefox don't fully support the File System Access API yet.
 
-### Vercel
+### Changes not saving
+Ensure you granted "readwrite" permission when selecting the directory. You may need to re-select the directory.
 
-```bash
-# Install Vercel CLI
-npm i -g vercel
+### Post not appearing in list
+- Ensure the file ends with `.mdx` or `.md`
+- Verify the file has valid YAML frontmatter
+- Check that all required fields are present
 
-# Deploy
-vercel
-```
+### AI autocomplete not working
+- Verify `VITE_OPENAI_API_KEY` is set in `.env.local`
+- Restart the dev server after adding environment variables
+- Check browser console for API errors
+- Ensure the sparkles icon is highlighted (enabled)
+- Check your OpenAI API quota and billing
 
-Or connect your GitHub repository in the Vercel dashboard for automatic deployments.
+### Image upload not working
+- Verify Cloudinary credentials are set (either in `.env.local` or Settings)
+- Check that the upload preset is set to "Unsigned" mode
+- Verify your Cloudinary account is active
 
-### Netlify
+### Permission errors on macOS/Windows
+If you see "Permission Denied" errors, try:
+- Re-selecting the directory
+- Checking that the directory isn't in a protected system location
+- Ensuring no other application has locked the files
 
-```bash
-# Install Netlify CLI
-npm i -g netlify-cli
+## Roadmap
 
-# Build and deploy
-pnpm build
-netlify deploy --prod --dir=dist
-```
-
-Or connect your GitHub repository in the Netlify dashboard.
-
-### GitHub Pages
-
-1. Build the project:
-   ```bash
-   pnpm build
-   ```
-
-2. Deploy the `dist` folder to GitHub Pages using GitHub Actions or manually.
-
-3. Example GitHub Actions workflow (`.github/workflows/deploy.yml`):
-   ```yaml
-   name: Deploy to GitHub Pages
-   
-   on:
-     push:
-       branches: [ main ]
-   
-   jobs:
-     deploy:
-       runs-on: ubuntu-latest
-       steps:
-         - uses: actions/checkout@v4
-         - uses: pnpm/action-setup@v2
-           with:
-             version: 10.10.0
-         - uses: actions/setup-node@v4
-           with:
-             node-version: '20'
-             cache: 'pnpm'
-         - run: pnpm install
-         - run: pnpm build
-         - uses: peaceiris/actions-gh-pages@v3
-           with:
-             github_token: ${{ secrets.GITHUB_TOKEN }}
-             publish_dir: ./dist
-   ```
-
-### Other Static Hosts
-
-The CMS works with any static hosting provider. Just build and deploy the `dist` folder:
-- Cloudflare Pages
-- Firebase Hosting
-- AWS S3 + CloudFront
-- Render
-- Railway
-
-### Environment Variables
-
-If you're using AI autocomplete features, make sure to set your environment variables in your hosting provider's dashboard:
-- `VITE_OPENAI_API_KEY` - Your OpenAI API key
-- `VITE_OPENAI_MODEL` - (Optional) Model selection
+- [ ] Support for multiple content directories
+- [ ] Bulk operations (batch edit, delete)
+- [ ] Image optimization and resizing
+- [ ] Spell check
+- [ ] Word count and reading time
+- [ ] Export to different formats
+- [x] Themes and customization
+- [ ] Plugin system
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT - see [LICENSE](LICENSE) for details.
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built with [TipTap](https://tiptap.dev/) - The headless editor framework
+- Powered by [OpenAI](https://openai.com/) - AI completions and writing assistance
+- Images hosted on [Cloudinary](https://cloudinary.com/) - Media management platform
+- Icons from [Lucide](https://lucide.dev/) - Beautiful icon library
+- Fonts from [Google Fonts](https://fonts.google.com/) - Open source font library
+
+## Support
+
+- Report issues on [GitHub Issues](https://github.com/yourusername/blog-cms/issues)
+- Read the [Quick Start Guide](QUICKSTART.md) for common questions
+- Check [Contributing Guide](CONTRIBUTING.md) for development setup
+
+---
+
+Made with ❤️ by [Nickolus Cunningham](https://github.com/yourusername) and contributors.

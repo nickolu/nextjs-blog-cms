@@ -43,7 +43,7 @@ export function FrontmatterForm({ frontmatter, onChange, errors = [] }: Frontmat
   };
 
   return (
-    <div className="bg-gray-800 p-4">
+    <div className="theme-bg-secondary p-4">
       {errors.length > 0 && (
         <div className="mb-4 p-3 bg-red-900/30 border border-red-800 rounded">
           <ul className="text-sm text-red-400 list-disc list-inside">
@@ -61,9 +61,9 @@ export function FrontmatterForm({ frontmatter, onChange, errors = [] }: Frontmat
               type="checkbox"
               checked={frontmatter.draft === true}
               onChange={(e) => onChange({ ...frontmatter, draft: e.target.checked })}
-              className="w-4 h-4 bg-gray-900 border-gray-700 rounded focus:ring-2 focus:ring-blue-500 text-blue-600"
+              className="w-4 h-4 theme-bg-primary theme-border rounded focus:ring-2 focus:ring-blue-500 text-blue-600"
             />
-            <span className="text-sm text-gray-300">Draft</span>
+            <span className="text-sm theme-text-secondary">Draft</span>
           </label>
           {frontmatter.draft && (
             <span className="text-xs px-2 py-0.5 bg-yellow-900/40 text-yellow-300 rounded">
@@ -82,7 +82,7 @@ export function FrontmatterForm({ frontmatter, onChange, errors = [] }: Frontmat
               type="text"
               value={frontmatter.title}
               onChange={(e) => handleChange('title', e.target.value)}
-              className="w-full px-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-1.5 theme-bg-primary border theme-border rounded text-sm theme-text-primary focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Post title"
             />
           </div>
@@ -96,7 +96,7 @@ export function FrontmatterForm({ frontmatter, onChange, errors = [] }: Frontmat
               type="date"
               value={frontmatter.date}
               onChange={(e) => handleChange('date', e.target.value)}
-              className="w-full px-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-1.5 theme-bg-primary border theme-border rounded text-sm theme-text-primary focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -109,7 +109,7 @@ export function FrontmatterForm({ frontmatter, onChange, errors = [] }: Frontmat
             id="description"
             value={frontmatter.description}
             onChange={(e) => handleChange('description', e.target.value)}
-            className="w-full px-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-1.5 theme-bg-primary border theme-border rounded text-sm theme-text-primary focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             rows={2}
             placeholder="Brief description"
           />
@@ -125,7 +125,7 @@ export function FrontmatterForm({ frontmatter, onChange, errors = [] }: Frontmat
               type="text"
               value={frontmatter.author}
               onChange={(e) => handleChange('author', e.target.value)}
-              className="w-full px-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-1.5 theme-bg-primary border theme-border rounded text-sm theme-text-primary focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Author name"
             />
           </div>
@@ -141,7 +141,7 @@ export function FrontmatterForm({ frontmatter, onChange, errors = [] }: Frontmat
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyDown={handleTagKeyDown}
-                className="flex-1 px-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1 px-3 py-1.5 theme-bg-primary border theme-border rounded text-sm theme-text-primary focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Add tag"
               />
               <button

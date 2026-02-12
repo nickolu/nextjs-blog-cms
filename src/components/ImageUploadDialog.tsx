@@ -89,13 +89,13 @@ export function ImageUploadDialog({ isOpen, onClose, onImageInsert, postTitle }:
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg w-full max-w-lg border border-gray-700">
+      <div className="theme-bg-secondary rounded-lg w-full max-w-lg border theme-border">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-200">Add Image</h2>
+        <div className="flex items-center justify-between p-4 border-b theme-border">
+          <h2 className="text-lg font-semibold theme-text-primary">Add Image</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-200"
+            className="theme-text-muted hover:theme-text-primary"
             aria-label="Close"
           >
             <X size={20} />
@@ -103,14 +103,14 @@ export function ImageUploadDialog({ isOpen, onClose, onImageInsert, postTitle }:
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-700">
+        <div className="flex border-b theme-border">
           {cloudinaryConfigured && (
             <button
               onClick={() => setActiveTab('upload')}
               className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'upload'
-                  ? 'text-blue-400 border-b-2 border-blue-400'
-                  : 'text-gray-400 hover:text-gray-200'
+                  ? 'theme-accent border-b-2 border-blue-400'
+                  : 'theme-text-muted hover:theme-text-primary'
               }`}
             >
               <Upload size={16} className="inline mr-2" />
@@ -121,8 +121,8 @@ export function ImageUploadDialog({ isOpen, onClose, onImageInsert, postTitle }:
             onClick={() => setActiveTab('url')}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'url'
-                ? 'text-blue-400 border-b-2 border-blue-400'
-                : 'text-gray-400 hover:text-gray-200'
+                ? 'theme-accent border-b-2 border-blue-400'
+                : 'theme-text-muted hover:theme-text-primary'
             }`}
           >
             <Link size={16} className="inline mr-2" />
@@ -162,7 +162,7 @@ export function ImageUploadDialog({ isOpen, onClose, onImageInsert, postTitle }:
                   <img
                     src={preview}
                     alt="Preview"
-                    className="w-full h-48 object-contain bg-gray-900 rounded-lg"
+                    className="w-full h-48 object-contain theme-bg-primary rounded-lg"
                   />
                   <p className="text-xs text-gray-400 mt-2 truncate">
                     {selectedFile?.name}
@@ -205,7 +205,7 @@ export function ImageUploadDialog({ isOpen, onClose, onImageInsert, postTitle }:
           {activeTab === 'url' && (
             <form onSubmit={handleUrlSubmit} className="space-y-4">
               <div>
-                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="imageUrl" className="block text-sm font-medium theme-text-secondary mb-2">
                   Image URL
                 </label>
                 <input
@@ -214,7 +214,7 @@ export function ImageUploadDialog({ isOpen, onClose, onImageInsert, postTitle }:
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://example.com/image.jpg"
-                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 theme-bg-primary border theme-border rounded theme-text-secondary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoFocus
                 />
               </div>

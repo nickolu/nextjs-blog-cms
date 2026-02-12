@@ -379,12 +379,12 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-900">
+    <div className="flex flex-col h-full theme-bg-primary">
       {/* Toolbar */}
-      <div className="border-b border-gray-700 p-2 flex flex-wrap gap-1 bg-gray-800">
+      <div className="border-b theme-border p-2 flex flex-wrap gap-1 theme-bg-secondary">
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${editor.isActive('bold') ? 'bg-gray-700 text-blue-400' : ''}`}
+          className={`p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary ${editor.isActive('bold') ? 'bg-gray-700 text-blue-400' : ''}`}
           title="Bold"
         >
           <Bold size={16} />
@@ -392,7 +392,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
         
         <button
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${editor.isActive('italic') ? 'bg-gray-700 text-blue-400' : ''}`}
+          className={`p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary ${editor.isActive('italic') ? 'bg-gray-700 text-blue-400' : ''}`}
           title="Italic"
         >
           <Italic size={16} />
@@ -402,7 +402,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-700 text-blue-400' : ''}`}
+          className={`p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-700 text-blue-400' : ''}`}
           title="Heading 1"
         >
           <Heading1 size={16} />
@@ -410,7 +410,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-700 text-blue-400' : ''}`}
+          className={`p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-700 text-blue-400' : ''}`}
           title="Heading 2"
         >
           <Heading2 size={16} />
@@ -418,7 +418,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
         <button
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${editor.isActive('heading', { level: 3 }) ? 'bg-gray-700 text-blue-400' : ''}`}
+          className={`p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary ${editor.isActive('heading', { level: 3 }) ? 'bg-gray-700 text-blue-400' : ''}`}
           title="Heading 3"
         >
           <Heading3 size={16} />
@@ -428,7 +428,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${editor.isActive('bulletList') ? 'bg-gray-700 text-blue-400' : ''}`}
+          className={`p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary ${editor.isActive('bulletList') ? 'bg-gray-700 text-blue-400' : ''}`}
           title="Bullet List"
         >
           <List size={16} />
@@ -436,7 +436,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
         <button
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${editor.isActive('orderedList') ? 'bg-gray-700 text-blue-400' : ''}`}
+          className={`p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary ${editor.isActive('orderedList') ? 'bg-gray-700 text-blue-400' : ''}`}
           title="Ordered List"
         >
           <ListOrdered size={16} />
@@ -446,7 +446,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
         <button
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${editor.isActive('codeBlock') ? 'bg-gray-700 text-blue-400' : ''}`}
+          className={`p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary ${editor.isActive('codeBlock') ? 'bg-gray-700 text-blue-400' : ''}`}
           title="Code Block"
         >
           <Code size={16} />
@@ -454,7 +454,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
         <button
           onClick={addLink}
-          className={`p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 ${editor.isActive('link') ? 'bg-gray-700 text-blue-400' : ''}`}
+          className={`p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary ${editor.isActive('link') ? 'bg-gray-700 text-blue-400' : ''}`}
           title="Add Link"
         >
           <LinkIcon size={16} />
@@ -462,7 +462,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
         <button
           onClick={addImage}
-          className="p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200"
+          className="p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary"
           title="Add Image"
         >
           <ImageIcon size={16} />
@@ -473,7 +473,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
         <button
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
-          className="p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 disabled:opacity-30"
+          className="p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary disabled:opacity-30"
           title="Undo"
         >
           <Undo size={16} />
@@ -482,7 +482,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
         <button
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
-          className="p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200 disabled:opacity-30"
+          className="p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary disabled:opacity-30"
           title="Redo"
         >
           <Redo size={16} />
@@ -495,7 +495,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
             <button
               onClick={handleAutocompleteToggle}
               className={`p-1.5 rounded ${
-                autocompleteEnabled ? 'bg-gray-700 text-yellow-400' : 'text-gray-400 hover:bg-gray-700'
+                autocompleteEnabled ? 'bg-gray-700 text-yellow-400' : 'theme-text-muted hover:bg-gray-700'
               }`}
               title={`AI Autocomplete - ${autocompleteEnabled ? 'Enabled' : 'Disabled'}\nAutomatically suggests text completions as you write`}
             >
@@ -504,7 +504,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
             <button
               onClick={handleAIReview}
-              className="p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200"
+              className="p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary"
               title="AI Review - Get feedback on your writing\nSelect text or review entire document"
             >
               <MessageSquare size={16} />
@@ -515,7 +515,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
               className={`p-1.5 rounded ${
                 writingAssistantEnabled
                   ? 'bg-gray-700 text-green-400'
-                  : 'text-gray-400 hover:bg-gray-700'
+                  : 'theme-text-muted hover:bg-gray-700'
               }`}
               title={`Writing Assistant - ${writingAssistantEnabled ? 'Enabled' : 'Disabled'}\nReal-time grammar, style, and clarity suggestions`}
             >
@@ -525,7 +525,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
             {writingAssistantEnabled && (
               <button
                 onClick={handleCheckWritingNow}
-                className="p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200"
+                className="p-1.5 rounded theme-text-muted hover:bg-gray-700 hover:theme-text-primary"
                 title="Check Now - Manually check writing\nClick to analyze current sentence or all sentences in selection"
                 disabled={isWritingAssistantChecking}
               >
@@ -572,7 +572,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
       {/* Editor Content */}
       <div
-        className="flex-1 overflow-y-auto bg-gray-900"
+        className="flex-1 overflow-y-auto theme-bg-primary"
         style={{
           '--editor-font-family': `var(--editor-font-${editorFont})`
         } as React.CSSProperties}

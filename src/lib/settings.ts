@@ -19,7 +19,8 @@ export interface Settings {
     autoAdvanceToNextSuggestion: boolean;
   };
   editor: {
-    font: 'system' | 'serif' | 'mono' | 'inter' | 'merriweather' | 'ibm-plex-mono';
+    font: 'system' | 'serif' | 'mono' | 'inter' | 'merriweather' | 'ibm-plex-mono' | 'noto-sans-mono' | 'suse-mono' | 'xanh-mono' | 'noto-serif' | 'pt-serif';
+    theme: 'dark' | 'deep-blue' | 'midnight' | 'forest' | 'monokai';
   };
   cloudinary: CloudinarySettings;
 }
@@ -46,6 +47,7 @@ const DEFAULT_SETTINGS: Settings = {
   },
   editor: {
     font: 'system',
+    theme: 'dark',
   },
   cloudinary: {
     enabled: false,

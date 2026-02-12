@@ -328,6 +328,50 @@ export function SettingsDialog({ isOpen, onClose, onSettingsChange }: SettingsDi
             <div>
               <h3 className="text-md font-semibold text-gray-200 mb-4">Editor</h3>
 
+              {/* Theme Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Color Theme
+                </label>
+                <div className="grid grid-cols-5 gap-2">
+                  {[
+                    { value: 'dark', label: 'Dark', color: '#111827' },
+                    { value: 'deep-blue', label: 'Deep Blue', color: '#0f172a' },
+                    { value: 'midnight', label: 'Midnight', color: '#000000' },
+                    { value: 'forest', label: 'Forest', color: '#0c1713' },
+                    { value: 'monokai', label: 'Monokai', color: '#272822' },
+                  ].map((theme) => (
+                    <button
+                      key={theme.value}
+                      type="button"
+                      onClick={() =>
+                        setSettings({
+                          ...settings,
+                          editor: {
+                            ...settings.editor,
+                            theme: theme.value as Settings['editor']['theme'],
+                          },
+                        })
+                      }
+                      className={`flex flex-col items-center gap-2 p-3 rounded border-2 transition-colors ${
+                        settings.editor.theme === theme.value
+                          ? 'border-blue-500 bg-gray-800'
+                          : 'border-gray-700 bg-gray-900 hover:border-gray-600'
+                      }`}
+                    >
+                      <div
+                        className="w-full h-8 rounded"
+                        style={{ backgroundColor: theme.color }}
+                      />
+                      <span className="text-xs text-gray-300">{theme.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Choose a color theme for the editor and interface
+                </p>
+              </div>
+
               {/* Font Selection */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -347,24 +391,42 @@ export function SettingsDialog({ isOpen, onClose, onSettingsChange }: SettingsDi
                   className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-300 focus:outline-none focus:border-blue-500"
                   style={{
                     fontFamily: (() => {
-                      const fontMap = {
+                      const fontMap: Record<Settings['editor']['font'], string> = {
                         system: 'system-ui',
                         serif: 'Georgia',
                         mono: 'monospace',
                         inter: 'Inter, sans-serif',
                         merriweather: 'Merriweather, serif',
                         'ibm-plex-mono': 'IBM Plex Mono, monospace',
+                        'noto-sans-mono': 'Noto Sans Mono, monospace',
+                        'suse-mono': 'SUSE Mono, monospace',
+                        'xanh-mono': 'Xanh Mono, monospace',
+                        'noto-serif': 'Noto Serif, serif',
+                        'pt-serif': 'PT Serif, serif',
                       };
                       return fontMap[settings.editor.font];
                     })()
                   }}
                 >
-                  <option value="system" style={{ fontFamily: 'system-ui' }}>System Default</option>
-                  <option value="serif" style={{ fontFamily: 'Georgia' }}>Serif (Georgia)</option>
-                  <option value="mono" style={{ fontFamily: 'monospace' }}>Monospace</option>
-                  <option value="inter" style={{ fontFamily: 'Inter, sans-serif' }}>Inter</option>
-                  <option value="merriweather" style={{ fontFamily: 'Merriweather, serif' }}>Merriweather</option>
-                  <option value="ibm-plex-mono" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>IBM Plex Mono</option>
+                  <optgroup label="System">
+                    <option value="system" style={{ fontFamily: 'system-ui' }}>System Default</option>
+                  </optgroup>
+                  <optgroup label="Sans Serif">
+                    <option value="inter" style={{ fontFamily: 'Inter, sans-serif' }}>Inter</option>
+                  </optgroup>
+                  <optgroup label="Serif">
+                    <option value="serif" style={{ fontFamily: 'Georgia' }}>Serif (Georgia)</option>
+                    <option value="merriweather" style={{ fontFamily: 'Merriweather, serif' }}>Merriweather</option>
+                    <option value="noto-serif" style={{ fontFamily: 'Noto Serif, serif' }}>Noto Serif</option>
+                    <option value="pt-serif" style={{ fontFamily: 'PT Serif, serif' }}>PT Serif</option>
+                  </optgroup>
+                  <optgroup label="Monospace">
+                    <option value="mono" style={{ fontFamily: 'monospace' }}>Monospace</option>
+                    <option value="ibm-plex-mono" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>IBM Plex Mono</option>
+                    <option value="noto-sans-mono" style={{ fontFamily: 'Noto Sans Mono, monospace' }}>Noto Sans Mono</option>
+                    <option value="suse-mono" style={{ fontFamily: 'SUSE Mono, monospace' }}>SUSE Mono</option>
+                    <option value="xanh-mono" style={{ fontFamily: 'Xanh Mono, monospace' }}>Xanh Mono</option>
+                  </optgroup>
                 </select>
                 <p className="mt-1 text-xs text-gray-500">
                   Choose the font family for editor content

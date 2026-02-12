@@ -67,11 +67,11 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost, onDe
   }, [postsWithMeta, searchQuery, showDrafts]);
 
   return (
-    <div className="flex flex-col h-full bg-gray-850 border-r border-gray-700">
+    <div className="flex flex-col h-full theme-bg-tertiary border-r theme-border">
       {/* Header */}
-      <div className="p-3 border-b border-gray-700 bg-gray-800">
+      <div className="p-3 border-b theme-border theme-bg-secondary">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-sm text-gray-200">Posts</h2>
+          <h2 className="font-semibold text-sm theme-text-primary">Posts</h2>
           <div className="flex gap-2">
             <button
               onClick={() => setShowDrafts(!showDrafts)}
@@ -94,13 +94,13 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost, onDe
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-2.5 top-2 text-gray-500" size={16} />
+          <Search className="absolute left-2.5 top-2 theme-text-muted" size={16} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search..."
-            className="w-full pl-9 pr-3 py-1.5 bg-gray-900 border border-gray-700 rounded text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full pl-9 pr-3 py-1.5 theme-bg-primary border theme-border rounded text-sm theme-text-secondary placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </div>
@@ -108,7 +108,7 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost, onDe
       {/* Post List */}
       <div className="flex-1 overflow-y-auto">
         {filteredPosts.length === 0 ? (
-          <div className="p-4 text-center text-gray-500 text-sm">
+          <div className="p-4 text-center theme-text-muted text-sm">
             {searchQuery ? 'No posts found' : 'No posts yet'}
           </div>
         ) : (
@@ -119,17 +119,17 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost, onDe
                 onClick={() => onSelectPost(post)}
                 onMouseEnter={() => setHoveredPost(post.name)}
                 onMouseLeave={() => setHoveredPost(null)}
-                className={`w-full text-left px-3 py-2.5 hover:bg-gray-800 transition-colors border-l-2 cursor-pointer ${
+                className={`w-full text-left px-3 py-2.5 hover:theme-bg-secondary transition-colors border-l-2 cursor-pointer ${
                   selectedPost?.name === post.name
-                    ? 'bg-gray-800 border-blue-500'
+                    ? 'theme-bg-secondary border-blue-500'
                     : 'border-transparent'
                 }`}
               >
                 <div className="flex items-start gap-2">
-                  <FileText size={14} className="text-gray-500 mt-0.5 flex-shrink-0" />
+                  <FileText size={14} className="theme-text-muted mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-sm text-gray-200 truncate">
+                      <h3 className="font-medium text-sm theme-text-primary truncate">
                         {frontmatter.title || post.name}
                       </h3>
                       {frontmatter.draft && (
@@ -138,7 +138,7 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost, onDe
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs theme-text-muted mt-0.5">
                       {frontmatter.date}
                     </p>
                     {frontmatter.tags && frontmatter.tags.length > 0 && (

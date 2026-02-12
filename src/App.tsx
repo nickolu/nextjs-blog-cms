@@ -25,6 +25,7 @@ import {
   createBlankPost,
   Frontmatter,
 } from './lib/mdx-parser';
+import { getSettings } from './lib/settings';
 
 function App() {
   const [directoryHandle, setDirectoryHandle] = React.useState<FileSystemDirectoryHandle | null>(null);
@@ -51,6 +52,23 @@ function App() {
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [postToDelete, setPostToDelete] = React.useState<BlogPost | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [editorTheme, setEditorTheme] = React.useState(() => getSettings().editor.theme);
+
+  // Apply theme to document
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', editorTheme);
+  }, [editorTheme]);
+
+  // Listen for theme changes from settings
+  React.useEffect(() => {
+    const handleStorageChange = () => {
+      const newTheme = getSettings().editor.theme;
+      setEditorTheme(newTheme);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Check for saved directory handle on mount
   React.useEffect(() => {
@@ -245,6 +263,9 @@ function App() {
   const handleSettingsChange = () => {
     // Increment version to trigger re-render in child components
     setSettingsVersion((v) => v + 1);
+    // Update theme
+    const newTheme = getSettings().editor.theme;
+    setEditorTheme(newTheme);
   };
 
   // Handle delete post
@@ -362,28 +383,28 @@ function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900">
+    <div className="h-screen flex flex-col theme-bg-primary">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 p-3 flex items-center justify-between">
+      <header className="theme-bg-secondary border-b theme-border p-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded"
+            className="p-2 theme-text-muted hover:theme-text-primary hover:bg-gray-700 rounded"
             title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
           >
             {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
           </button>
-          <h1 className="text-lg font-semibold text-gray-100">Blog CMS</h1>
+          <h1 className="text-lg font-semibold theme-text-primary">Blog CMS</h1>
           <button
             onClick={handleOpenDirectory}
-            className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded"
+            className="p-2 theme-text-muted hover:theme-text-primary hover:bg-gray-700 rounded"
             title="Change directory"
           >
             <FolderOpen size={16} />
           </button>
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded"
+            className="p-2 theme-text-muted hover:theme-text-primary hover:bg-gray-700 rounded"
             title="Settings"
           >
             <Settings size={16} />
@@ -445,10 +466,10 @@ function App() {
           {selectedPost || isNewPost ? (
             <>
               {/* Collapsible Metadata */}
-              <div className="border-b border-gray-700">
+              <div className="border-b theme-border">
                 <button
                   onClick={() => setMetadataOpen(!metadataOpen)}
-                  className="w-full px-4 py-2 bg-gray-800 hover:bg-gray-750 flex items-center justify-between text-gray-300 text-sm"
+                  className="w-full px-4 py-2 theme-bg-secondary hover:bg-gray-750 flex items-center justify-between theme-text-secondary text-sm"
                 >
                   <span className="font-medium">Post Metadata</span>
                   {metadataOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -472,7 +493,7 @@ function App() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
+            <div className="flex-1 flex items-center justify-center theme-text-muted">
               <div className="text-center">
                 <p className="text-lg mb-2">No post selected</p>
                 <p className="text-sm">Select a post from the sidebar or create a new one</p>

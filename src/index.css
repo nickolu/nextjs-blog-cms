@@ -1,5 +1,5 @@
 /* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Merriweather:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Merriweather:wght@400;700&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+Mono:wght@400;600&family=SUSE+Mono:wght@400;600&family=Xanh+Mono:wght@400&family=Noto+Serif:wght@400;700&family=PT+Serif:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -13,11 +13,78 @@
   --editor-font-inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --editor-font-merriweather: 'Merriweather', ui-serif, Georgia, serif;
   --editor-font-ibm-plex-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  --editor-font-noto-sans-mono: 'Noto Sans Mono', ui-monospace, SFMono-Regular, monospace;
+  --editor-font-suse-mono: 'SUSE Mono', ui-monospace, SFMono-Regular, monospace;
+  --editor-font-xanh-mono: 'Xanh Mono', ui-monospace, SFMono-Regular, monospace;
+  --editor-font-noto-serif: 'Noto Serif', ui-serif, Georgia, serif;
+  --editor-font-pt-serif: 'PT Serif', ui-serif, Georgia, serif;
 }
 
-/* TipTap Editor Styles - Dark Theme */
+/* Theme Color Variables */
+[data-theme="dark"] {
+  --color-bg-primary: #111827;
+  --color-bg-secondary: #1f2937;
+  --color-bg-tertiary: #1a1d23;
+  --color-text-primary: #e5e7eb;
+  --color-text-secondary: #d1d5db;
+  --color-text-muted: #9ca3af;
+  --color-border: #374151;
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+}
+
+[data-theme="deep-blue"] {
+  --color-bg-primary: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-bg-tertiary: #0c1220;
+  --color-text-primary: #e2e8f0;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+  --color-accent: #60a5fa;
+  --color-accent-hover: #3b82f6;
+}
+
+[data-theme="midnight"] {
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #0a0a0a;
+  --color-bg-tertiary: #050505;
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #e0e0e0;
+  --color-text-muted: #a0a0a0;
+  --color-border: #1a1a1a;
+  --color-accent: #60a5fa;
+  --color-accent-hover: #3b82f6;
+}
+
+[data-theme="forest"] {
+  --color-bg-primary: #0c1713;
+  --color-bg-secondary: #1a2e25;
+  --color-bg-tertiary: #081210;
+  --color-text-primary: #d5ebe0;
+  --color-text-secondary: #c0dccb;
+  --color-text-muted: #8fb399;
+  --color-border: #2d4538;
+  --color-accent: #34d399;
+  --color-accent-hover: #10b981;
+}
+
+[data-theme="monokai"] {
+  --color-bg-primary: #272822;
+  --color-bg-secondary: #3e3d32;
+  --color-bg-tertiary: #1e1f1a;
+  --color-text-primary: #f8f8f2;
+  --color-text-secondary: #e6e6dc;
+  --color-text-muted: #a09f93;
+  --color-border: #5a594d;
+  --color-accent: #66d9ef;
+  --color-accent-hover: #4fc9df;
+}
+
+/* TipTap Editor Styles - Theme-aware */
 .ProseMirror {
-  @apply min-h-[400px] p-6 focus:outline-none text-gray-200 leading-relaxed;
+  @apply min-h-[400px] p-6 focus:outline-none leading-relaxed;
+  color: var(--color-text-primary);
   font-size: 16px;
   max-width: 800px;
   margin: 0 auto;
@@ -35,15 +102,18 @@
 }
 
 .ProseMirror h1 {
-  @apply text-3xl font-bold mb-4 mt-8 text-gray-100;
+  @apply text-3xl font-bold mb-4 mt-8;
+  color: var(--color-text-primary);
 }
 
 .ProseMirror h2 {
-  @apply text-2xl font-bold mb-3 mt-6 text-gray-100;
+  @apply text-2xl font-bold mb-3 mt-6;
+  color: var(--color-text-primary);
 }
 
 .ProseMirror h3 {
-  @apply text-xl font-bold mb-2 mt-5 text-gray-100;
+  @apply text-xl font-bold mb-2 mt-5;
+  color: var(--color-text-primary);
 }
 
 .ProseMirror ul,
@@ -64,19 +134,27 @@
 }
 
 .ProseMirror code {
-  @apply bg-gray-800 text-blue-300 px-2 py-0.5 rounded text-sm font-mono;
+  @apply px-2 py-0.5 rounded text-sm font-mono;
+  background-color: var(--color-bg-secondary);
+  color: #93c5fd;
 }
 
 .ProseMirror pre {
-  @apply bg-gray-950 text-gray-100 p-4 rounded-lg mb-4 overflow-x-auto border border-gray-800;
+  @apply p-4 rounded-lg mb-4 overflow-x-auto border;
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
 }
 
 .ProseMirror pre code {
-  @apply bg-transparent p-0 text-gray-100;
+  @apply bg-transparent p-0;
+  color: var(--color-text-primary);
 }
 
 .ProseMirror blockquote {
-  @apply border-l-4 border-gray-600 pl-4 italic my-4 text-gray-400;
+  @apply border-l-4 pl-4 italic my-4;
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
 }
 
 .ProseMirror a {
@@ -89,7 +167,8 @@
 
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
-  @apply text-gray-600 float-left h-0 pointer-events-none;
+  @apply float-left h-0 pointer-events-none;
+  color: var(--color-text-muted);
 }
 
 /* AI Autocomplete Suggestion Styles */
@@ -154,6 +233,47 @@
 
   .bg-gray-950 {
     background-color: #0d0f12;
+  }
+
+  /* Theme utility classes */
+  .theme-bg-primary {
+    background-color: var(--color-bg-primary);
+  }
+
+  .theme-bg-secondary {
+    background-color: var(--color-bg-secondary);
+  }
+
+  .theme-bg-tertiary {
+    background-color: var(--color-bg-tertiary);
+  }
+
+  .theme-text-primary {
+    color: var(--color-text-primary);
+  }
+
+  .theme-text-secondary {
+    color: var(--color-text-secondary);
+  }
+
+  .theme-text-muted {
+    color: var(--color-text-muted);
+  }
+
+  .theme-border {
+    border-color: var(--color-border);
+  }
+
+  .theme-accent {
+    color: var(--color-accent);
+  }
+
+  .theme-accent-bg {
+    background-color: var(--color-accent);
+  }
+
+  .theme-accent-hover:hover {
+    background-color: var(--color-accent-hover);
   }
 }
 
