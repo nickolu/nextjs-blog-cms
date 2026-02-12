@@ -114,12 +114,12 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost, onDe
         ) : (
           <div>
             {filteredPosts.map(({ post, frontmatter }) => (
-              <button
+              <div
                 key={post.name}
                 onClick={() => onSelectPost(post)}
                 onMouseEnter={() => setHoveredPost(post.name)}
                 onMouseLeave={() => setHoveredPost(null)}
-                className={`w-full text-left px-3 py-2.5 hover:bg-gray-800 transition-colors border-l-2 ${
+                className={`w-full text-left px-3 py-2.5 hover:bg-gray-800 transition-colors border-l-2 cursor-pointer ${
                   selectedPost?.name === post.name
                     ? 'bg-gray-800 border-blue-500'
                     : 'border-transparent'
@@ -167,7 +167,7 @@ export function FileManager({ posts, selectedPost, onSelectPost, onNewPost, onDe
                     </button>
                   )}
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}
