@@ -25,7 +25,7 @@ import {
   MessageSquare,
   CheckCircle,
   Loader2,
-  RefreshCw
+  ScanText
 } from 'lucide-react';
 import { AutocompleteExtension } from '../extensions/AutocompleteExtension';
 import { WritingAssistantExtension, writingAssistantPluginKey } from '../extensions/WritingAssistantExtension';
@@ -464,10 +464,10 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
               <button
                 onClick={handleCheckWritingNow}
                 className="p-1.5 rounded text-gray-400 hover:bg-gray-700 hover:text-gray-200"
-                title="Check Now - Manually check current sentence\nClick to analyze the sentence at cursor position"
+                title="Check Now - Manually check writing\nClick to analyze current sentence or all sentences in selection"
                 disabled={isWritingAssistantChecking}
               >
-                <RefreshCw size={16} className={isWritingAssistantChecking ? 'opacity-50' : ''} />
+                <ScanText size={16} className={isWritingAssistantChecking ? 'opacity-50' : ''} />
               </button>
             )}
           </>

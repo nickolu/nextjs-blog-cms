@@ -114,22 +114,21 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
             return false;
           }
 
-          // Get cursor position
-          const { from } = state.selection;
+          const { from, to } = state.selection;
           const { doc } = state;
 
-          // Find the end of the current sentence by scanning forward
-          let sentenceEnd = from;
-          let foundEnd = false;
+          // Find all sentence-ending positions within the selection (or from cursor forward)
+          const sentenceEnds: number[] = [];
+          let searchStart = from;
+          const searchEnd = from === to ? doc.content.size : to;
 
-          // Scan forward to find sentence-ending punctuation
-          while (sentenceEnd < doc.content.size && !foundEnd) {
-            const char = doc.textBetween(sentenceEnd, sentenceEnd + 1, '', '');
+          while (searchStart < searchEnd) {
+            const char = doc.textBetween(searchStart, searchStart + 1, '', '');
 
             // Check if this is sentence-ending punctuation
             if (/[.!?]/.test(char)) {
               // Move past the punctuation and any whitespace
-              sentenceEnd++;
+              let sentenceEnd = searchStart + 1;
               while (sentenceEnd < doc.content.size) {
                 const nextChar = doc.textBetween(sentenceEnd, sentenceEnd + 1, '', '');
                 if (!/\s/.test(nextChar)) {
@@ -137,21 +136,24 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
                 }
                 sentenceEnd++;
               }
-              foundEnd = true;
-              break;
+              sentenceEnds.push(sentenceEnd);
+              searchStart = sentenceEnd;
+            } else {
+              searchStart++;
             }
-            sentenceEnd++;
           }
 
-          if (!foundEnd) {
-            // No sentence end found, can't check
+          if (sentenceEnds.length === 0) {
+            // No sentence ends found, can't check
             return false;
           }
 
-          // Trigger check at sentence end
-          setTimeout(() => {
-            checkSentenceAtPosition(view, sentenceEnd, () => extension.options.settings);
-          }, 100);
+          // Trigger check for each sentence with a small delay between them
+          sentenceEnds.forEach((sentenceEnd, index) => {
+            setTimeout(() => {
+              checkSentenceAtPosition(view, sentenceEnd, () => extension.options.settings);
+            }, 100 + (index * 50)); // Stagger checks slightly
+          });
 
           return true;
         },
