@@ -1,5 +1,5 @@
 import { Extension } from '@tiptap/core';
-import { Plugin, PluginKey, Transaction } from '@tiptap/pm/state';
+import { Plugin, PluginKey, Transaction, TextSelection } from '@tiptap/pm/state';
 import { Decoration, DecorationSet, EditorView } from '@tiptap/pm/view';
 import { Settings } from '../lib/settings';
 import { Suggestion, WritingAssistantState } from '../types/writing-assistant';
@@ -8,14 +8,12 @@ import {
   extractSentence,
   hashSentence,
   getPrecedingContext,
-  shouldCheckNode,
 } from '../lib/sentence-utils';
 import {
   getSentenceSuggestions,
   SentenceContext,
 } from '../lib/ai-completion';
 import {
-  getPersistedReviewStatus,
   persistReviewStatus,
   loadPersistedState,
 } from '../lib/writing-assistant-storage';
@@ -56,7 +54,7 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
     return {
       setWritingAssistantEnabled:
         (enabled: boolean) =>
-        ({ tr, dispatch }) => {
+        ({ tr, dispatch }: any) => {
           if (dispatch) {
             tr.setMeta('setWritingAssistantEnabled', enabled);
           }
@@ -64,11 +62,11 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
         },
       acceptSuggestion:
         (suggestionId: string) =>
-        ({ tr, state, dispatch, view }) => {
+        ({ tr, state, dispatch }: any) => {
           const pluginState = writingAssistantPluginKey.getState(state);
           if (!pluginState) return false;
 
-          const suggestion = pluginState.suggestions.find(s => s.id === suggestionId);
+          const suggestion = pluginState.suggestions.find((s: any) => s.id === suggestionId);
           if (!suggestion) return false;
 
           if (dispatch) {
@@ -84,7 +82,7 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
         },
       ignoreSuggestion:
         (suggestionId: string) =>
-        ({ tr, dispatch }) => {
+        ({ tr, dispatch }: any) => {
           if (dispatch) {
             tr.setMeta('ignoreSuggestion', suggestionId);
           }
@@ -92,7 +90,7 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
         },
       showSuggestionTooltip:
         (data: { suggestionId: string; position: { top: number; left: number } }) =>
-        ({ tr, dispatch }) => {
+        ({ tr, dispatch }: any) => {
           if (dispatch) {
             tr.setMeta('showTooltip', data);
           }
@@ -100,7 +98,7 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
         },
       hideSuggestionTooltip:
         () =>
-        ({ tr, dispatch }) => {
+        ({ tr, dispatch }: any) => {
           if (dispatch) {
             tr.setMeta('hideTooltip', true);
           }
@@ -108,7 +106,7 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
         },
       checkWritingNow:
         () =>
-        ({ state, view }) => {
+        ({ state, view }: any) => {
           const pluginState = writingAssistantPluginKey.getState(state);
           if (!pluginState?.enabled || !extension.options.settings) {
             return false;
@@ -127,17 +125,18 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
 
             // Check if this is sentence-ending punctuation
             if (/[.!?]/.test(char)) {
-              // Move past the punctuation and any whitespace
-              let sentenceEnd = searchStart + 1;
-              while (sentenceEnd < doc.content.size) {
-                const nextChar = doc.textBetween(sentenceEnd, sentenceEnd + 1, '', '');
+              // Use position right after the punctuation (not after whitespace)
+              sentenceEnds.push(searchStart + 1);
+
+              // Move search position past whitespace for next iteration
+              searchStart++;
+              while (searchStart < doc.content.size) {
+                const nextChar = doc.textBetween(searchStart, searchStart + 1, '', '');
                 if (!/\s/.test(nextChar)) {
                   break;
                 }
-                sentenceEnd++;
+                searchStart++;
               }
-              sentenceEnds.push(sentenceEnd);
-              searchStart = sentenceEnd;
             } else {
               searchStart++;
             }
@@ -151,9 +150,50 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
           // Trigger check for each sentence with a small delay between them
           sentenceEnds.forEach((sentenceEnd, index) => {
             setTimeout(() => {
-              checkSentenceAtPosition(view, sentenceEnd, () => extension.options.settings);
+              checkSentenceAtPosition(view, sentenceEnd, () => extension.options.settings, true);
             }, 100 + (index * 50)); // Stagger checks slightly
           });
+
+          return true;
+        },
+      showNextSuggestion:
+        () =>
+        ({ state, view, tr, dispatch }: any) => {
+          const pluginState = writingAssistantPluginKey.getState(state);
+          if (!pluginState || pluginState.suggestions.length === 0) {
+            return false;
+          }
+
+          // Sort suggestions by document position
+          const sortedSuggestions = [...pluginState.suggestions].sort(
+            (a, b) => a.startPos - b.startPos
+          );
+
+          // Get next index (wrap around)
+          const nextIndex = (pluginState.currentSuggestionIndex + 1) % sortedSuggestions.length;
+          const nextSuggestion = sortedSuggestions[nextIndex];
+
+          if (dispatch) {
+            // Update current index
+            tr.setMeta('setCurrentSuggestionIndex', nextIndex);
+
+            // Show tooltip for next suggestion
+            // Get bounding rect for the suggestion position
+            const coords = view.coordsAtPos(nextSuggestion.startPos);
+            tr.setMeta('showTooltip', {
+              suggestionId: nextSuggestion.id,
+              position: { top: coords.top, left: coords.left },
+            });
+
+            dispatch(tr);
+
+            // Scroll to suggestion
+            view.dispatch(
+              state.tr.setSelection(
+                TextSelection.create(state.doc, nextSuggestion.startPos)
+              )
+            );
+          }
 
           return true;
         },
@@ -179,10 +219,11 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
               checkingPositions: new Set<number>(),
               isChecking: false,
               activeTooltip: null,
+              currentSuggestionIndex: 0,
             };
           },
 
-          apply(tr: Transaction, value: WritingAssistantState, oldState, newState) {
+          apply(tr: Transaction, value: WritingAssistantState, _oldState: any, newState: any) {
             // Handle meta commands
             const setEnabled = tr.getMeta('setWritingAssistantEnabled');
             if (setEnabled !== undefined) {
@@ -255,6 +296,15 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
               newValue = {
                 ...newValue,
                 isChecking: setChecking as boolean,
+              };
+            }
+
+            // Handle set current suggestion index
+            const setIndex = tr.getMeta('setCurrentSuggestionIndex');
+            if (setIndex !== undefined) {
+              newValue = {
+                ...newValue,
+                currentSuggestionIndex: setIndex as number,
               };
             }
 
@@ -356,7 +406,8 @@ export const WritingAssistantExtension = Extension.create<WritingAssistantOption
 async function checkSentenceAtPosition(
   view: EditorView,
   pos: number,
-  getSettings: () => any
+  getSettings: () => any,
+  forceCheck = false
 ) {
   const { state } = view;
   const pluginState = writingAssistantPluginKey.getState(state);
@@ -390,13 +441,15 @@ async function checkSentenceAtPosition(
   // Generate hash
   const sentenceHash = await hashSentence(text);
 
-  // Check if already reviewed
-  const reviewStatus = pluginState.reviewedSentences.get(sentenceHash);
+  // Check if already reviewed (skip this check if forceCheck is true)
+  if (!forceCheck) {
+    const reviewStatus = pluginState.reviewedSentences.get(sentenceHash);
 
-  if (reviewStatus) {
-    // If accepted or ignored, don't check again
-    if (reviewStatus.status === 'accepted' || reviewStatus.status === 'ignored') {
-      return;
+    if (reviewStatus) {
+      // If accepted or ignored, don't check again
+      if (reviewStatus.status === 'accepted' || reviewStatus.status === 'ignored') {
+        return;
+      }
     }
   }
 
@@ -555,6 +608,7 @@ function handleSetSuggestions(
     ...value,
     suggestions: allSuggestions,
     decorations,
+    currentSuggestionIndex: 0,
   };
 }
 
@@ -567,7 +621,7 @@ function handleDocumentChange(
   const affectedSuggestionIds = new Set<string>();
 
   tr.mapping.maps.forEach(map => {
-    map.forEach((oldStart, oldEnd, newStart, newEnd) => {
+    map.forEach((oldStart, oldEnd) => {
       // Find suggestions that overlap with edited range
       for (const suggestion of value.suggestions) {
         if (
@@ -603,6 +657,7 @@ function handleDocumentChange(
     ...value,
     suggestions: mappedSuggestions,
     decorations,
+    currentSuggestionIndex: 0,
   };
 }
 

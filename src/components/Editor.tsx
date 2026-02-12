@@ -29,9 +29,12 @@ import {
 } from 'lucide-react';
 import { AutocompleteExtension } from '../extensions/AutocompleteExtension';
 import { WritingAssistantExtension, writingAssistantPluginKey } from '../extensions/WritingAssistantExtension';
+import { ImageUploadExtension } from '../extensions/ImageUploadExtension';
 import { isAICompletionAvailable } from '../lib/ai-completion';
 import { ReviewDialog } from './ReviewDialog';
 import { WritingSuggestionTooltip } from './WritingSuggestionTooltip';
+import { ImageUploadDialog } from './ImageUploadDialog';
+import { Toast } from './Toast';
 import { getSettings, updateSettings } from '../lib/settings';
 import { Suggestion } from '../types/writing-assistant';
 
@@ -54,6 +57,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
   const isUpdatingRef = React.useRef(false);
   const [autocompleteEnabled, setAutocompleteEnabled] = React.useState(() => getSettings().aiAutocomplete.enabled);
   const [writingAssistantEnabled, setWritingAssistantEnabled] = React.useState(() => getSettings().writingAssistant.enabled);
+  const [editorFont, setEditorFont] = React.useState(() => getSettings().editor.font);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = React.useState(false);
   const [selectedTextForReview, setSelectedTextForReview] = React.useState('');
   const [activeTooltip, setActiveTooltip] = React.useState<{
@@ -61,6 +65,12 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
     position: { top: number; left: number };
   } | null>(null);
   const [isWritingAssistantChecking, setIsWritingAssistantChecking] = React.useState(false);
+  const [suggestionCount, setSuggestionCount] = React.useState(0);
+  const [isImageDialogOpen, setIsImageDialogOpen] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState<{
+    message: string;
+    type: 'success' | 'error' | 'loading';
+  } | null>(null);
   const aiAvailable = isAICompletionAvailable();
 
   const editor = useEditor({
@@ -93,6 +103,19 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
         enabled: writingAssistantEnabled,
         debounceDelay: getSettings().writingAssistant.debounceDelay,
         settings: getSettings().writingAssistant,
+      }),
+      ImageUploadExtension.configure({
+        enabled: true,
+        postTitle,
+        onUploadStart: () => {
+          setToastMessage({ message: 'Uploading image...', type: 'loading' });
+        },
+        onUploadSuccess: (url) => {
+          setToastMessage({ message: 'Image uploaded successfully!', type: 'success' });
+        },
+        onUploadError: (error) => {
+          setToastMessage({ message: error, type: 'error' });
+        },
       }),
     ],
     content: '',
@@ -152,6 +175,24 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
     }
   }, [editor, writingAssistantEnabled, aiAvailable]);
 
+  // Update editor font when settings change
+  React.useEffect(() => {
+    const settings = getSettings();
+    setEditorFont(settings.editor.font);
+  }, []);
+
+  // Listen for settings changes
+  React.useEffect(() => {
+    const handleSettingsChange = () => {
+      const settings = getSettings();
+      setEditorFont(settings.editor.font);
+    };
+
+    // Listen for storage events (settings changed in another tab or same tab)
+    window.addEventListener('storage', handleSettingsChange);
+    return () => window.removeEventListener('storage', handleSettingsChange);
+  }, []);
+
   // Listen for tooltip events from the plugin
   React.useEffect(() => {
     if (!editor) return;
@@ -177,6 +218,9 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
 
       // Update checking state
       setIsWritingAssistantChecking(pluginState.isChecking);
+
+      // Update suggestion count
+      setSuggestionCount(pluginState.suggestions.length);
     };
 
     editor.on('transaction', handleTransaction);
@@ -229,10 +273,7 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
   };
 
   const addImage = () => {
-    const url = prompt('Enter image URL:');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
+    setIsImageDialogOpen(true);
   };
 
   const handleAutocompleteToggle = () => {
@@ -261,12 +302,28 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
     if (!editor) return;
     editor.chain().acceptSuggestion(suggestionId).run();
     setActiveTooltip(null);
+
+    // Auto-advance if enabled
+    const settings = getSettings();
+    if (settings.writingAssistant.autoAdvanceToNextSuggestion && suggestionCount > 1) {
+      setTimeout(() => {
+        handleShowNextSuggestion();
+      }, 100);
+    }
   };
 
   const handleIgnoreSuggestion = (suggestionId: string) => {
     if (!editor) return;
     editor.chain().ignoreSuggestion(suggestionId).run();
     setActiveTooltip(null);
+
+    // Auto-advance if enabled
+    const settings = getSettings();
+    if (settings.writingAssistant.autoAdvanceToNextSuggestion && suggestionCount > 1) {
+      setTimeout(() => {
+        handleShowNextSuggestion();
+      }, 100);
+    }
   };
 
   const handleDismissTooltip = () => {
@@ -278,6 +335,11 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
   const handleCheckWritingNow = () => {
     if (!editor) return;
     editor.chain().focus().checkWritingNow().run();
+  };
+
+  const handleShowNextSuggestion = () => {
+    if (!editor) return;
+    editor.chain().focus().showNextSuggestion().run();
   };
 
   const handleAIReview = () => {
@@ -467,28 +529,54 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
                 title="Check Now - Manually check writing\nClick to analyze current sentence or all sentences in selection"
                 disabled={isWritingAssistantChecking}
               >
-                <ScanText size={16} className={isWritingAssistantChecking ? 'opacity-50' : ''} />
+                {isWritingAssistantChecking ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <ScanText size={16} />
+                )}
               </button>
             )}
           </>
         )}
 
-        {/* Spacer to push loader to the right */}
+        {/* Spacer to push counter/loader to the right */}
         <div className="flex-1" />
 
-        {/* Loading indicator - right aligned */}
-        {aiAvailable && isWritingAssistantChecking && writingAssistantEnabled && (
-          <div
-            className="flex items-center text-blue-400 px-2"
-            title="Writing Assistant is analyzing your text..."
-          >
-            <Loader2 size={16} className="animate-spin" />
-          </div>
+        {/* Writing Assistant Status - right aligned */}
+        {aiAvailable && writingAssistantEnabled && (
+          <>
+            {/* Show spinner when checking */}
+            {isWritingAssistantChecking && (
+              <div
+                className="flex items-center text-blue-400 px-2"
+                title="Writing Assistant is analyzing your text..."
+              >
+                <Loader2 size={16} className="animate-spin" />
+              </div>
+            )}
+
+            {/* Show counter when not checking and suggestions exist */}
+            {!isWritingAssistantChecking && suggestionCount > 0 && (
+              <button
+                onClick={handleShowNextSuggestion}
+                className="flex items-center gap-2 px-3 py-1 text-sm bg-red-600/20 text-red-400 hover:bg-red-600/30 rounded border border-red-600/40 transition-colors"
+                title={`${suggestionCount} suggestion${suggestionCount > 1 ? 's' : ''} - Click to view next`}
+              >
+                <span className="font-medium">{suggestionCount}</span>
+                <span className="text-xs">issue{suggestionCount > 1 ? 's' : ''}</span>
+              </button>
+            )}
+          </>
         )}
       </div>
 
       {/* Editor Content */}
-      <div className="flex-1 overflow-y-auto bg-gray-900">
+      <div
+        className="flex-1 overflow-y-auto bg-gray-900"
+        style={{
+          '--editor-font-family': `var(--editor-font-${editorFont})`
+        } as React.CSSProperties}
+      >
         <EditorContent editor={editor} />
       </div>
 
@@ -510,6 +598,26 @@ export function Editor({ content, onChange, postTitle, postDescription }: Editor
           onAccept={handleAcceptSuggestion}
           onIgnore={handleIgnoreSuggestion}
           onDismiss={handleDismissTooltip}
+        />
+      )}
+
+      {/* Image Upload Dialog */}
+      <ImageUploadDialog
+        isOpen={isImageDialogOpen}
+        onClose={() => setIsImageDialogOpen(false)}
+        onImageInsert={(url) => {
+          editor?.chain().focus().setImage({ src: url }).run();
+          setIsImageDialogOpen(false);
+        }}
+        postTitle={postTitle}
+      />
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <Toast
+          message={toastMessage.message}
+          type={toastMessage.type}
+          onClose={() => setToastMessage(null)}
         />
       )}
     </div>

@@ -1,3 +1,5 @@
+import { CloudinarySettings } from '../types/cloudinary';
+
 export interface Settings {
   aiAutocomplete: {
     enabled: boolean;
@@ -14,7 +16,12 @@ export interface Settings {
     triggerMode: 'on-sentence-end' | 'on-pause';
     debounceDelay: number;
     showSeverity: ('error' | 'warning' | 'suggestion')[];
+    autoAdvanceToNextSuggestion: boolean;
   };
+  editor: {
+    font: 'system' | 'serif' | 'mono' | 'inter' | 'merriweather' | 'ibm-plex-mono';
+  };
+  cloudinary: CloudinarySettings;
 }
 
 const SETTINGS_STORAGE_KEY = 'blog-cms-settings';
@@ -35,6 +42,26 @@ const DEFAULT_SETTINGS: Settings = {
     triggerMode: 'on-sentence-end',
     debounceDelay: 2000,
     showSeverity: ['error', 'warning', 'suggestion'],
+    autoAdvanceToNextSuggestion: true,
+  },
+  editor: {
+    font: 'system',
+  },
+  cloudinary: {
+    enabled: false,
+    cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || '',
+    uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || '',
+    folder: 'blog-images',
+    usePostFolders: false,
+    transformations: {
+      autoFormat: true,
+      quality: 80,
+      maxWidth: 1200,
+    },
+    validation: {
+      maxFileSizeMB: 10,
+      allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+    },
   },
 };
 
@@ -54,6 +81,22 @@ export function loadSettings(): Settings {
         writingAssistant: {
           ...DEFAULT_SETTINGS.writingAssistant,
           ...parsed.writingAssistant,
+        },
+        editor: {
+          ...DEFAULT_SETTINGS.editor,
+          ...parsed.editor,
+        },
+        cloudinary: {
+          ...DEFAULT_SETTINGS.cloudinary,
+          ...parsed.cloudinary,
+          transformations: {
+            ...DEFAULT_SETTINGS.cloudinary.transformations,
+            ...parsed.cloudinary?.transformations,
+          },
+          validation: {
+            ...DEFAULT_SETTINGS.cloudinary.validation,
+            ...parsed.cloudinary?.validation,
+          },
         },
       };
     }
@@ -90,6 +133,22 @@ export function updateSettings(updates: Partial<Settings>): Settings {
     writingAssistant: {
       ...current.writingAssistant,
       ...(updates.writingAssistant || {}),
+    },
+    editor: {
+      ...current.editor,
+      ...(updates.editor || {}),
+    },
+    cloudinary: {
+      ...current.cloudinary,
+      ...(updates.cloudinary || {}),
+      transformations: {
+        ...current.cloudinary.transformations,
+        ...(updates.cloudinary?.transformations || {}),
+      },
+      validation: {
+        ...current.cloudinary.validation,
+        ...(updates.cloudinary?.validation || {}),
+      },
     },
   };
   saveSettings(updated);

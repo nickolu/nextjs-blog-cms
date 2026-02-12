@@ -31,6 +31,8 @@ export function SettingsDialog({ isOpen, onClose, onSettingsChange }: SettingsDi
   const handleSave = () => {
     saveSettings(settings);
     onSettingsChange?.(settings);
+    // Trigger storage event for same-tab updates
+    window.dispatchEvent(new Event('storage'));
     onClose();
   };
 
@@ -295,6 +297,284 @@ export function SettingsDialog({ isOpen, onClose, onSettingsChange }: SettingsDi
                 <p className="mt-1 text-xs text-gray-500">
                   When to check your writing for suggestions
                 </p>
+              </div>
+
+              {/* Auto-advance Setting */}
+              <div className="mb-4">
+                <label className="flex items-center p-2 bg-gray-900 rounded border border-gray-700 hover:border-gray-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.writingAssistant.autoAdvanceToNextSuggestion}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        writingAssistant: {
+                          ...settings.writingAssistant,
+                          autoAdvanceToNextSuggestion: e.target.checked,
+                        },
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm text-gray-300">Auto-advance to next suggestion</span>
+                </label>
+                <p className="mt-1 text-xs text-gray-500">
+                  Automatically show the next suggestion after accepting or ignoring one
+                </p>
+              </div>
+            </div>
+
+            {/* Editor Section */}
+            <div>
+              <h3 className="text-md font-semibold text-gray-200 mb-4">Editor</h3>
+
+              {/* Font Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Editor Font
+                </label>
+                <select
+                  value={settings.editor.font}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      editor: {
+                        ...settings.editor,
+                        font: e.target.value as Settings['editor']['font'],
+                      },
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-300 focus:outline-none focus:border-blue-500"
+                  style={{
+                    fontFamily: (() => {
+                      const fontMap = {
+                        system: 'system-ui',
+                        serif: 'Georgia',
+                        mono: 'monospace',
+                        inter: 'Inter, sans-serif',
+                        merriweather: 'Merriweather, serif',
+                        'ibm-plex-mono': 'IBM Plex Mono, monospace',
+                      };
+                      return fontMap[settings.editor.font];
+                    })()
+                  }}
+                >
+                  <option value="system" style={{ fontFamily: 'system-ui' }}>System Default</option>
+                  <option value="serif" style={{ fontFamily: 'Georgia' }}>Serif (Georgia)</option>
+                  <option value="mono" style={{ fontFamily: 'monospace' }}>Monospace</option>
+                  <option value="inter" style={{ fontFamily: 'Inter, sans-serif' }}>Inter</option>
+                  <option value="merriweather" style={{ fontFamily: 'Merriweather, serif' }}>Merriweather</option>
+                  <option value="ibm-plex-mono" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>IBM Plex Mono</option>
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Choose the font family for editor content
+                </p>
+              </div>
+            </div>
+
+            {/* Cloudinary Section */}
+            <div>
+              <h3 className="text-md font-semibold text-gray-200 mb-4">Cloudinary Image Upload</h3>
+
+              {/* Enable toggle */}
+              <div className="mb-4">
+                <label className="flex items-center justify-between p-3 bg-gray-900 rounded border border-gray-700 hover:border-gray-600 cursor-pointer">
+                  <span className="text-sm text-gray-300">Enable Cloudinary Upload</span>
+                  <input
+                    type="checkbox"
+                    checked={settings.cloudinary.enabled}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        cloudinary: { ...settings.cloudinary, enabled: e.target.checked },
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                </label>
+              </div>
+
+              {/* Cloud Name */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Cloud Name
+                </label>
+                <input
+                  type="text"
+                  value={settings.cloudinary.cloudName}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      cloudinary: { ...settings.cloudinary, cloudName: e.target.value },
+                    })
+                  }
+                  placeholder="your-cloud-name"
+                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              {/* Upload Preset */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Upload Preset
+                </label>
+                <input
+                  type="text"
+                  value={settings.cloudinary.uploadPreset}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      cloudinary: { ...settings.cloudinary, uploadPreset: e.target.value },
+                    })
+                  }
+                  placeholder="unsigned-preset"
+                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Create an unsigned upload preset in your Cloudinary dashboard
+                </p>
+              </div>
+
+              {/* Folder */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Upload Folder
+                </label>
+                <input
+                  type="text"
+                  value={settings.cloudinary.folder}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      cloudinary: { ...settings.cloudinary, folder: e.target.value },
+                    })
+                  }
+                  placeholder="blog-images"
+                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              {/* Use Post Folders */}
+              <div className="mb-4">
+                <label className="flex items-center p-2 bg-gray-900 rounded border border-gray-700 hover:border-gray-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.cloudinary.usePostFolders}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        cloudinary: { ...settings.cloudinary, usePostFolders: e.target.checked },
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm text-gray-300">Organize by post (creates subfolders)</span>
+                </label>
+              </div>
+
+              {/* Transformations Section */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Image Transformations
+                </label>
+
+                {/* Auto Format */}
+                <label className="flex items-center p-2 bg-gray-900 rounded border border-gray-700 hover:border-gray-600 cursor-pointer mb-2">
+                  <input
+                    type="checkbox"
+                    checked={settings.cloudinary.transformations.autoFormat}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        cloudinary: {
+                          ...settings.cloudinary,
+                          transformations: {
+                            ...settings.cloudinary.transformations,
+                            autoFormat: e.target.checked,
+                          },
+                        },
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm text-gray-300">Auto format (WebP)</span>
+                </label>
+
+                {/* Quality */}
+                <div className="mb-2">
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Quality: {settings.cloudinary.transformations.quality}
+                  </label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="100"
+                    value={settings.cloudinary.transformations.quality}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        cloudinary: {
+                          ...settings.cloudinary,
+                          transformations: {
+                            ...settings.cloudinary.transformations,
+                            quality: parseInt(e.target.value),
+                          },
+                        },
+                      })
+                    }
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Max Width */}
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">
+                    Max Width (px)
+                  </label>
+                  <input
+                    type="number"
+                    value={settings.cloudinary.transformations.maxWidth}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        cloudinary: {
+                          ...settings.cloudinary,
+                          transformations: {
+                            ...settings.cloudinary.transformations,
+                            maxWidth: parseInt(e.target.value) || 1200,
+                          },
+                        },
+                      })
+                    }
+                    placeholder="1200"
+                    className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Max File Size */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Max File Size (MB)
+                </label>
+                <input
+                  type="number"
+                  value={settings.cloudinary.validation.maxFileSizeMB}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      cloudinary: {
+                        ...settings.cloudinary,
+                        validation: {
+                          ...settings.cloudinary.validation,
+                          maxFileSizeMB: parseInt(e.target.value) || 10,
+                        },
+                      },
+                    })
+                  }
+                  placeholder="10"
+                  className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500"
+                />
               </div>
             </div>
           </div>

@@ -30,6 +30,7 @@ export interface WritingAssistantState {
     suggestionId: string;
     position: { top: number; left: number };
   } | null;
+  currentSuggestionIndex: number;
 }
 
 export interface LLMSuggestion {

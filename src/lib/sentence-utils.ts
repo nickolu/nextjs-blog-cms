@@ -55,7 +55,6 @@ export function extractSentence(
   pos: number
 ): { text: string; from: number; to: number } | null {
   const { doc } = state;
-  const $pos = doc.resolve(pos);
 
   // Find sentence start (scan backward)
   let startPos = pos;
